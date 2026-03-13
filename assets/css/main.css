@@ -5,6 +5,7 @@
 	Story by HTML5 UP
 	html5up.net | @ajlkn
 	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+
 */
 
 html, body, div, span, applet, object,
@@ -8601,3 +8602,13 @@ input, select, textarea {
 			#wrapper.divided > .invert:first-child {
 				box-shadow: none !important;
 			}
+
+#center-text-box {
+  text-align: center;   /* center all text inside */
+  padding: 4em 2em;     /* optional spacing above and below */
+}
+
+#center-text-box .inner {
+  max-width: 800px;     /* optional: limit width */
+  margin: 0 auto;       /* center the container horizontally */
+}
