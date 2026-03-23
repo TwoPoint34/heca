@@ -21,10 +21,12 @@
 			  color: darkblue;
 			}
 			
-			.indent {
-			  font-size: 1.25rem;
-			  text-indent: 40px;
-			}
+			.inline-indent {
+			  font-size: 1rem;
+			  display: inline-block; /* lets margin work on inline text */
+			  margin-left: 40px;     /* adjust indentation */
+			}			
+			
 		 </style>
 	</head>
 	<body class="is-preload">
@@ -38,10 +40,10 @@
 							<p class="major">In recent years, there has been a growing movement in ecological landscaping and climate adaptation. Home Ecology 
 							Advisors was created due first to a strong need for more professionals in the field and second to make sure that ecological science 
 							and economics are central to the work. We believe that all of our interventions should:</p>
-								<p class="indent">-directly address well-defined, measurable environmental challenges</p>
-								<p class="indent">-maximize positive social and environmental impacts through reducing cost, labor, fuel, and long-term 
-								maintenance requirements</p>
-								<p class="indent">-ultimately save the client money and improve quality of life</p>
+								<span class="inline-indent">-Directly address well-defined, measurable environmental challenges</span>
+								<span class="inline-indent">-Maximize positive social and environmental impacts through reducing cost, labor, fuel, and long-term 
+								maintenance requirements</span>
+								<span class="inline-indent">-Ultimately save the client money and improve quality of life</span>
 							</p>
 
 							<ul class="actions stacked">
