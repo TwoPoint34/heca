@@ -469,7 +469,7 @@ input[type="range"]::-ms-thumb {
     <p>AdaptGeo Consultants</p>
     <div class="spinner" id="spinner"></div>
 
-    <button id="continue-btn" style="display: none;">Continue</button>
+    <button id="continue-btn" style="display: none;">Continu</button>
   </div>
 </div>
 
@@ -676,6 +676,27 @@ island.</p>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 
 <script>
+
+// Add debugging to confirm DOM is ready
+console.log("Script starting, DOM readiness:", document.readyState);
+
+// Log the state at multiple points
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOMContentLoaded fired");
+});
+
+window.addEventListener('load', () => {
+    console.log("window.load fired");
+});
+
+// Check if menu element exists
+setTimeout(() => {
+    const menu = document.getElementById("menu");
+    const splashScreen = document.getElementById("splash-screen");
+    console.log("Menu element exists:", !!menu);
+    console.log("Splash screen element exists:", !!splashScreen);
+    console.log("All DOM elements ready:", !!menu && !!splashScreen);
+}, 100);
 
 const styles = {
   "Streets": "mapbox://styles/mapbox/streets-v12",
