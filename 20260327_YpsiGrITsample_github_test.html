@@ -215,15 +215,9 @@ html, body {
   cursor: pointer;
 }
 
-.mapboxgl-ctrl-bottom-right {
-  position: absolute !important;  /* needed for z-index to apply */
-  z-index: 99999 !important;       /* very high to beat other UI */
-  bottom: 25px !important; /* move it up from the bottom */
-  right: 10px !important;  /* optional, reassert position */
-}
+
 
 #map {
-  z-index: 0;
   top: 94px;   /* Adjust this to match the combined height of title bar and tabs... currently, this parameter is not working */
   visibility: hidden;  /* hide map initially */
   width: 100%;
