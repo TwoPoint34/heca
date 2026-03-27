@@ -2175,6 +2175,10 @@ var popup = new mapboxgl.Popup({
 const customLayerDefs = []; // Stores all custom layer definitions. Everytime a user selects a mapbox style (basemap), the map 
 // layers must be reloaded. We create the customLayerDefs list so that reloading the layers will not require executing the 
 // entire code loop below
+
+console.log("customLayerDefs length immediately after creation:", customLayerDefs.length);
+
+
 const splash = document.getElementById("splash-screen");
 const titlebar = null;
 const menuelement = document.getElementById("menu");
@@ -2255,6 +2259,12 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
 
 
 	for (let i = 1; i <= tileset_source_list.length; i++) {  // We're simply establishing a counter here, so any list could be used
+
+	  console.log("Before processing layers - customLayerDefs.length:", customLayerDefs.length);
+	  customLayerDefs.forEach((def, index) => {
+		  console.log(`Layer ${index}:`, def.name || def.id || 'unnamed');
+	  });
+
 
 	  const tilesource = window["tileset_source_" + i];
 	  const tiletype = window["tileset_type_" + i];
