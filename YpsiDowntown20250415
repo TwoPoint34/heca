@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>AdaptGeo Interactive Map</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js"></script>
+<style>
+body { margin: 0; padding: 0; }
+#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+#menu {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 1;
+	background-color: white;
+	padding: 10px;
+	width: 250px;
+	transition: transform 0.3s ease;
+	transform: translateX(0); /* Menu initially visible */
+}
+
+#menu.closed {
+	transform: translateX(250px); /* Hide the menu by sliding it out */
+}
+/* Style for the imadaptgeoe in the menu */
+#menu img {
+	width: 100%;
+	height: auto;
+	margin-bottom: 10px; /* Space below the imadaptgeoe */
+}
+#search-box {
+  background: #f8f8f8;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.menu-item { margin-bottom: 10px; }
+
+/* Button for toggling the menu */
+#menuToggle {
+	position: absolute;
+	top: 10px;
+	left: -50px;
+	background-color: #333;
+	color: white;
+	border: none;
+	padding: 5px;
+	cursor: pointer;
+	border-radius: 4px;
+	width: 60px;  /* Double the original width */
+	height: 50px;  /* Double the original height */
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 30px;  /* Increase the font size for the three lines */
+}
+
+/* General styles for the range input */
+input[type="range"] {
+  -webkit-appearance: none;    /* WebKit browsers (Chrome, Safari, Android) */
+  -moz-appearance: none;       /* Firefox */
+  appearance: none;            /* Other browsers */
+  width: 100%;                 /* Full width */
+  height: 10px;                /* Track height */
+  background: #ddd;         /* Grey background for the track */
+  border-radius: 5px;          /* Rounded corners for track */
+  outline: none;               /* Remove focus outline */
+  transition: background 0.3s ease; /* Smooth background transition */
+}
+
+/* WebKit-based browsers (Chrome, Safari, Android) track styling */
+input[type="range"]::-webkit-slider-runnable-track {
+  background: #ddd;         /* Grey background for the track */
+  height: 10px;                /* Track height */
+  border-radius: 5px;          /* Rounded corners */
+}
+
+/* Firefox track styling */
+input[type="range"]::-moz-range-track {
+  background: #ddd;         /* Grey background for the track */
+  height: 10px;                /* Track height */
+  border-radius: 5px;          /* Rounded corners */
+}
+
+/* WebKit-based browsers (Chrome, Safari, Android) thumb styling */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;    /* Remove default appearance */
+  height: 20px;                /* Thumb height */
+  width: 20px;                 /* Thumb width */
+  border-radius: 50%;          /* Circular thumb */
+  background: #457953;         /* Green color for the thumb */
+  cursor: pointer;            /* Pointer cursor on hover */
+  transition: background 0.3s ease; /* Smooth background transition */
+  margin-top: -5px;            /* Adjust to center the thumb vertically */
+}
+
+/* Firefox thumb styling */
+input[type="range"]::-moz-range-thumb {
+  height: 20px;                /* Thumb height */
+  width: 20px;                 /* Thumb width */
+  border-radius: 50%;          /* Circular thumb */
+  background: #457953;         /* Green color for the thumb */
+  cursor: pointer;            /* Pointer cursor on hover */
+}
+
+/* MS Edge and IE track styling */
+input[type="range"]::-ms-track {
+  background: #ddd;         /* Grey background for the track */
+  height: 10px;                /* Track height */
+  border-radius: 5px;          /* Rounded corners */
+  border-color: transparent;   /* Transparent borders */
+  color: transparent;          /* Transparent color */
+  width: 100%;
+}
+
+/* MS Edge and IE thumb styling */
+input[type="range"]::-ms-thumb {
+  height: 20px;                /* Thumb height */
+  width: 20px;                 /* Thumb width */
+  border-radius: 50%;          /* Circular thumb */
+  background: #457953;         /* Green color for the thumb */
+  cursor: pointer;            /* Pointer cursor on hover */
+  margin-top: -5px;            /* Adjust to center the thumb vertically */
+}
+
+
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="menu">
+	<!-- Add the imadaptgeoe at the top of the menu -->
+	<img src="https://github.com/AGgeoviz/AGgeoviz.github.io/blob/main/AG_horiz_green_2400.png?raw=true" alt="Menu Imadaptgeoe">
+	<button id="menuToggle">≡</button>
+	<div id="search-box">
+	<input type="text" id="address" placeholder="Enter address..." />
+	<button onclick="searchAddress()">Search</button>
+	</div>
+	<!-- "value" below sets the initial position of the web map opacity slider -->
+	<div class="menu-item">
+    	Potential Check Dams: <br>
+    	<input type="range" id="checkdam-opacity" min="0" max="100" value="100">
+	</div>
+	<div class="menu-item">
+    	High Peak-Discharge Basin: <br>
+    	<input type="range" id="highpd-opacity" min="0" max="100" value="75">
+	</div>		
+	<div class="menu-item">
+    	Non-canopy Vegetation: <br>
+    	<input type="range" id="noncanopyveg-opacity" min="0" max="100" value="75">
+	</div>
+	<div class="menu-item">
+    	Tree Canopy: <br>
+    	<input type="range" id="treecanopy-opacity" min="0" max="100" value="75">
+	</div>	
+	<div class="menu-item">
+    	Building Footprints: <br>
+    	<input type="range" id="footprints-opacity" min="0" max="100" value="100">
+	</div>
+	<div class="menu-item">
+    	Parcels: <br>
+    	<input type="range" id="parcels-opacity" min="0" max="100" value="100">
+	</div>
+	<div class="menu-item">
+    	Relative Land Surface Temperature: <br>
+    	<input type="range" id="raster-opacity" min="0" max="100" value="75">
+	</div>
+    <div class="menu-item">
+    	Median Household Income: <br>
+    	<input type="range" id="income-opacity" min="0" max="100" value="1">
+	</div>	
+</div>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiYWRhcHRnZW8iLCJhIjoiY2xwdmIwMGlyMDNkZzJrcGsybXh1emFpMSJ9.qeCqoOvHTXJIKF4q80v4CA';
+var map = new mapboxgl.Map({
+	container: 'map',
+	maxZoom: 20,
+	minZoom: 16,
+	zoom: 16,
+	center: [-83.618813, 42.239132],
+	style: 'mapbox://styles/mapbox/satellite-streets-v12'
+});
+
+// Add a popup to the map for parcels
+var popup = new mapboxgl.Popup({
+	closeButton: false
+});
+
+map.on('load', function() {
+
+	// Add income vector tileset source and layer
+	map.addSource('income-tileset-source', {
+		type: 'vector',
+		url: 'mapbox://adaptgeo.2d22pg35'
+	});
+	map.addLayer({
+		'id': 'income-tileset-layer',
+		'type': 'fill', // Change this to 'line' or 'symbol' as needed
+		'source': 'income-tileset-source',
+		'source-layer': 'WashCoCensusTractsMedHouseInc-dq0a66',
+		'paint': {
+			'fill-color': '#C4A484',
+			'fill-outline-color': '#000000', // This sets the border color
+			'fill-opacity': 0.01
+		}
+	});
+
+	// Add raster tileset source and layer
+	map.addSource('raster-tileset-source', {
+		'type': 'raster',
+		'url': 'mapbox://adaptgeo.32fef3sw'
+	});
+	map.addLayer({
+		'id': 'raster-tileset-layer',
+		'type': 'raster',
+		'source': 'raster-tileset-source',
+		'paint': {
+			'raster-opacity': 0.75 // Set the opacity to 75%
+		}
+	});
+
+	// Add parcels vector tileset source and layer
+	map.addSource('parcels-tileset-source', {
+		type: 'vector',
+		url: 'mapbox://adaptgeo.YpsiParcelsAddressAPN'
+	});
+	map.addLayer({
+		'id': 'parcels-tileset-layer',
+		'type': 'fill', // Change this to 'line' or 'symbol' as needed
+		'source': 'parcels-tileset-source',
+		'source-layer': 'YpsiParcelsAddressAPN',
+		'paint': {
+			'fill-color': '#facc71',
+			'fill-outline-color': '#000000', // This sets the border color
+			'fill-opacity': 1
+		}
+	});
+
+	// Add building footprints vector tileset source and layer
+	map.addSource('footprints-tileset-source', {
+		'type': 'vector',
+		'url': 'mapbox://adaptgeo.0qonjbak' // Replace with actual vector tileset URL
+	});
+	map.addLayer({
+		'id': 'footprints-tileset-layer',
+		'type': 'fill',
+		'source': 'footprints-tileset-source',
+		'source-layer': 'YpsiDowntownWithBuildingType_-6tsint', // Replace with actual source layer name
+		'paint': {
+			'fill-color': '#a8a396',
+			'fill-opacity': 1
+		}
+	});
+	
+	// Add tree canopy vector tileset source and layer
+	map.addSource('treecanopy-tileset-source', {
+		'type': 'vector',
+		'url': 'mapbox://adaptgeo.cpf99l33'
+	});
+	map.addLayer({
+		'id': 'treecanopy-tileset-layer',
+		'type': 'fill',
+		'source': 'treecanopy-tileset-source',
+		'source-layer': 'TreeCanopy_0808130444-a5bm9a', // Replace with actual source layer name
+		'paint': {
+			'fill-color': '#008000',
+			'fill-opacity': 0.75
+		}
+	});
+	
+	// Add non-canopy vegetation vector tileset source and layer
+	map.addSource('noncanopyveg-tileset-source', {
+		'type': 'vector',
+		'url': 'mapbox://adaptgeo.1946hgu2'
+	});
+	map.addLayer({
+		'id': 'noncanopyveg-tileset-layer',
+		'type': 'fill',
+		'source': 'noncanopyveg-tileset-source',
+		'source-layer': 'VegNonCanopy_0808130444-0iuc39',
+		'paint': {
+			'fill-color': '#ffff00',
+			'fill-opacity': 0.75
+		}
+	});
+	
+	// Add high peak-discharge vector tileset source and layer
+	map.addSource('highpd-tileset-source', {
+		'type': 'vector',
+		'url': 'mapbox://adaptgeo.66wrvweg' // Replace with actual vector tileset URL
+	});
+	map.addLayer({
+		'id': 'highpd-tileset-layer',
+		'type': 'fill',
+		'source': 'highpd-tileset-source',
+		'source-layer': 'AOIBasinWithColor_0808130444-3blccx', // Replace with actual source layer name
+		'paint': {
+			'fill-color': '#5ccae8',
+			'fill-opacity': 0.75
+		}
+	});	
+	
+	// Add check dam vector tileset source and layer
+	map.addSource('checkdam-tileset-source', {
+		'type': 'vector',
+		'url': 'mapbox://adaptgeo.cphpu1rj'
+	});
+	map.addLayer({
+		'id': 'checkdam-tileset-layer',
+		'type': 'fill',
+		'source': 'checkdam-tileset-source',
+		'source-layer': 'PotentialCheckDamLocations_08-8fyyzu', // Replace with actual source layer name
+		'paint': {
+			'fill-color': '#0000FF',
+			'fill-opacity': 0.75
+		}
+	});
+	
+	map.moveLayer('highlighted-parcel-layer');  // Moves red outline to top of list so it is displayed on top of all layers
+
+	// Function to disable layer click events and pop-ups when opacity is 0
+	function setLayerVisibility(layerId, opacity) {
+		if (opacity === 0) {
+			map.setLayoutProperty(layerId, 'visibility', 'none');
+			// Remove pop-up if opacity is 0
+			popup.remove();
+		} else {
+			map.setLayoutProperty(layerId, 'visibility', 'visible');
+		}
+	}
+
+	// Potential check dam vector layer opacity control
+	var checkdamOpacity = document.getElementById('checkdam-opacity');
+	checkdamOpacity.addEventListener('input', function(e) {
+		var opacity = parseInt(e.target.value, 10) / 100;
+		map.setPaintProperty('checkdam-tileset-layer', 'fill-opacity', opacity);
+		setLayerVisibility('checkdam-tileset-layer', opacity);
+	});
+	
+	// High peak-discharge vector layer opacity control
+	var highpdOpacity = document.getElementById('highpd-opacity');
+	highpdOpacity.addEventListener('input', function(e) {
+		var opacity = parseInt(e.target.value, 10) / 100;
+		map.setPaintProperty('highpd-tileset-layer', 'fill-opacity', opacity);
+		setLayerVisibility('highpd-tileset-layer', opacity);
+	});
+
+	// Non-canopy vegetation vector layer opacity control
+	var noncanopyvegOpacity = document.getElementById('noncanopyveg-opacity');
+	noncanopyvegOpacity.addEventListener('input', function(e) {
+		var opacity = parseInt(e.target.value, 10) / 100;
+		map.setPaintProperty('noncanopyveg-tileset-layer', 'fill-opacity', opacity);
+		setLayerVisibility('noncanopyveg-tileset-layer', opacity);
+	});
+
+	// Tree canopy vector layer opacity control
+	var treecanopyOpacity = document.getElementById('treecanopy-opacity');
+	treecanopyOpacity.addEventListener('input', function(e) {
+		var opacity = parseInt(e.target.value, 10) / 100;
+		map.setPaintProperty('treecanopy-tileset-layer', 'fill-opacity', opacity);
+		setLayerVisibility('treecanopy-tileset-layer', opacity);
+	});
+
+	// Building footprint vector layer opacity control
+	var footprintsOpacity = document.getElementById('footprints-opacity');
+	footprintsOpacity.addEventListener('input', function(e) {
+		var opacity = parseInt(e.target.value, 10) / 100;
+		map.setPaintProperty('footprints-tileset-layer', 'fill-opacity', opacity);
+		setLayerVisibility('footprints-tileset-layer', opacity);
+	});
+
+	// Parcels vector layer opacity control
+	var parcelsOpacity = document.getElementById('parcels-opacity');
+	parcelsOpacity.addEventListener('input', function(e) {
+		var opacity = parseInt(e.target.value, 10) / 100;
+		map.setPaintProperty('parcels-tileset-layer', 'fill-opacity', opacity);
+		setLayerVisibility('parcels-tileset-layer', opacity);
+	});
+
+	// Land surface temperature raster layer opacity control
+	var rasterOpacity = document.getElementById('raster-opacity');
+	rasterOpacity.addEventListener('input', function(e) {
+		var opacity = parseInt(e.target.value, 10) / 100;
+		map.setPaintProperty('raster-tileset-layer', 'raster-opacity', opacity);
+		setLayerVisibility('raster-tileset-layer', opacity);
+	});
+
+	// Median household income vector layer opacity control
+	var incomeOpacity = document.getElementById('income-opacity');
+	incomeOpacity.addEventListener('input', function(e) {
+		var opacity = parseInt(e.target.value, 10) / 100;
+		map.setPaintProperty('income-tileset-layer', 'fill-opacity', opacity);
+		setLayerVisibility('income-tileset-layer', opacity);
+	});
+
+	// Add scale bar in the upper-left corner
+	var scale = new mapboxgl.ScaleControl({
+		maxWidth: 200,
+		unit: 'imperial'  // Use 'metric' for metric units
+	});
+	map.addControl(scale, 'top-left');
+
+	// Add toggle functionality for the menu
+	const menu = document.getElementById('menu');
+	const menuToggle = document.getElementById('menuToggle');
+
+	menuToggle.addEventListener('click', () => {
+		menu.classList.toggle('closed'); // Toggle the 'closed' class to slide the menu
+	});
+   
+	// Add an event listener to produce feature attribute pop-ups when the user clicks on the map
+	map.on('click', function(e) {
+
+		// Query the 'income-tileset-layer' layer to get features at the click location
+		// Apparently the first layer within this list is given lowest priority (i.e. user clicks at points where there are multiple
+		// layers with pop-ups will display pop-ups for the layers below first)
+		var featuresincome = map.queryRenderedFeatures(e.point, {
+			layers: ['income-tileset-layer']
+		});
+
+		// If there are features at the click location, show a popup for income
+		if (featuresincome.length) {
+			var feature = featuresincome[0];
+
+			popup.remove();  // remove any existing popup
+
+			// Set the popup location to the click location
+			popup.setLngLat(e.lngLat);
+
+			// Set the popup content to the Median Household Income property of the feature
+			popup.setHTML('<h3>Median Household Income (USD, 2020 Census Tract)</h3><p>' + feature.properties.nhgis0003_ + '</p>');
+
+			// Add the popup to the map
+			popup.addTo(map);
+		}
+		
+		// Query the 'parcels-tileset-layer' layer to get features at the click location
+		var featuresparcels = map.queryRenderedFeatures(e.point, {
+			layers: ['parcels-tileset-layer']
+		});
+
+		// If there are features at the click location, show a popup for parcels
+		if (featuresparcels.length) {
+		  var feature = featuresparcels[0];
+
+		  // Remove any existing popup
+		  popup.remove();
+
+		  // Show the popup
+		  popup.setLngLat(e.lngLat)
+			   .setHTML('<h3>' + feature.properties.address + '</h3><p>' + feature.properties.apn + '</p>')
+			   .addTo(map);
+		}
+
+
+		// Query the 'footprints-tileset-layer' layer to get features at the click location
+		var featuresfootprints = map.queryRenderedFeatures(e.point, {
+			layers: ['footprints-tileset-layer']
+		});
+
+		// If there are features at the click location, show a popup for footprints
+		if (featuresfootprints.length) {
+			var feature = featuresfootprints[0];
+
+			popup.remove();  // remove any existing popup
+
+			// Set the popup location to the click location
+			popup.setLngLat(e.lngLat);
+
+			// Set the popup content to the 'build_type' property of the feature
+			popup.setHTML('<h3>Building Type</h3><p>' + feature.properties.b_typ_name + '</p>');
+
+			// Add the popup to the map
+			popup.addTo(map);
+		}
+	});
+});
+
+function searchAddress() {
+  const address = document.getElementById('address').value;
+  const center = map.getCenter();  // Get map center dynamically
+  const proximity = `${center.lng},${center.lat}`;
+  let cleanAddress = address.trim().toLowerCase();
+  cleanAddress = cleanAddress.replace(/\./g, ''); // Remove periods
+  cleanAddress = cleanAddress.replace(/\s+/g, ' '); // Collapse double spaces
+
+  fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(cleanAddress)}.json?access_token=${mapboxgl.accessToken}&proximity=${proximity}&types=address`)
+	.then(res => res.json())
+	.then(data => {
+	  if (!data.features.length) {
+		alert('No results found.');
+		return;
+	  }
+	  const coords = data.features[0].center;
+	  map.flyTo({ center: coords, zoom: 17 });
+
+	  // Small delay to ensure features are rendered at new zoom
+	  setTimeout(() => {
+		const point = map.project(coords);
+		const features = map.queryRenderedFeatures(point, {
+		  layers: ['parcels-tileset-layer']
+		});
+
+		if (features.length > 0) {
+		  const parcel = features[0];
+
+		  // Remove existing popup before showing new one
+		  popup.remove();
+
+		  popup.setLngLat(coords)
+			   .setHTML(`<h3>${parcel.properties.address}</h3><p>${parcel.properties.apn}</p>`)
+			   .addTo(map);
+		} else {
+		  alert('No parcel found at that location');
+		}
+	  }, 1000);
+	});
+}
+
+document.getElementById('address').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    searchAddress();
+  }
+});
+
+</script>
+</body>
+</html>
