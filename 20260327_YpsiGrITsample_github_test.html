@@ -469,7 +469,7 @@ input[type="range"]::-ms-thumb {
     <p>AdaptGeo Consultants</p>
     <div class="spinner" id="spinner"></div>
 
-    <button id="continue-btn" style="display: none;">Continue</button>
+    <button id="continue-btn" style="display: none;">Continu</button>
   </div>
 </div>
 
@@ -2321,18 +2321,15 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
 
 
 	  if (iconurl != null && iconurl.trim().toLowerCase().endsWith('.png')) {
-		  map.loadImage(iconurl, function(error, image) {
-			if (error) throw error;
-			map.addImage(iconimage, image, { sdf: true });
-			
-			// Move the check INSIDE the callback
-			if (map.hasImage(iconimage)) {
-			  console.log(`Icon '${iconimage}' is present in the map style.`);
-			} else {
-			  console.warn(`Icon '${iconimage}' is NOT present in the map style.`);
+		map.loadImage(iconurl, function(error, image) {
+			if (error) {
+				console.error(`Failed to load image from ${iconurl}:`, error);
+				return;  // Stop if image fails to load
 			}
-		  });
-		}
+			map.addImage(iconimage, image, { sdf: true });
+			console.log(`Icon '${iconimage}' successfully added to map`);
+		});
+	}
 
 	  if (iconurl != null && iconurl.trim().toLowerCase().endsWith('.svg')) {
 		loadSvgAsImage(iconurl, iconimage);
