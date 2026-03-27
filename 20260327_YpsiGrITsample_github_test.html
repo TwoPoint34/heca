@@ -469,7 +469,7 @@ input[type="range"]::-ms-thumb {
     <p>AdaptGeo Consultants</p>
     <div class="spinner" id="spinner"></div>
 
-    <button id="continue-btn" style="display: none;">Continu</button>
+    <button id="continue-btn" style="display: none;">Continuuu</button>
   </div>
 </div>
 
@@ -683,7 +683,7 @@ const styles = {
   "Dark": "mapbox://styles/mapbox/dark-v11"
 };
 
-
+document.addEventListener("DOMContentLoaded", () => {
 mapboxgl.accessToken = 'pk.eyJ1IjoiYWRhcHRnZW8iLCJhIjoiY2xwdmIwMGlyMDNkZzJrcGsybXh1emFpMSJ9.qeCqoOvHTXJIKF4q80v4CA';
 var map = new mapboxgl.Map({
 	container: 'map',
@@ -702,7 +702,19 @@ var map = new mapboxgl.Map({
 
 	// We use the id: in map.setPaintProperty() below
 
+const element = document.getElementById("aerial-opacity");
 
+if (element && map.getLayer('satellitestreets')) {
+  // The element exists — run your code here
+  console.log("Element found!");
+  // Example:
+  map.on('style.load', () => {  
+    document.getElementById('aerial-opacity').addEventListener('input', (e) => {
+    const opacity = parseFloat(e.target.value);
+    map.setPaintProperty('satellitestreets', 'raster-opacity', opacity);
+    });
+  });
+}
 
 // Create empty list for all to-be-defined variables such that the lists can later be looped through and the variables processed
 let tileset_source_list = [];  // Create empty list for tileset_source_##
@@ -2768,7 +2780,7 @@ console.log({
 			'line-opacity': lineopacity
 		  }
 		});
-
+});
 
 
 	    // Add the manual zoom logic HERE
