@@ -30,25 +30,6 @@ html, body {
   height: 100%;
 }
 
-#splash-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10000; /* above everything */
-  transition: opacity 0.5s ease;
-}
-
-#splash-screen.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
 /* Centered content box */
 .splash-content {
   background: white;
@@ -74,13 +55,6 @@ html, body {
   to {
     transform: rotate(360deg);
   }
-}
-
-#continue-btn {
-  margin-top: 1rem;
-  padding: 0.6rem 1.2rem;
-  font-size: 1rem;
-  cursor: pointer;
 }
 
 #title-bar {
@@ -224,7 +198,7 @@ html, body {
 
 #map {
   top: 94px;   /* Adjust this to match the combined height of title bar and tabs... currently, this parameter is not working */
-  visibility: hidden;  /* hide map initially */
+  visibility: visible;
   width: 100%;
   height: 100%;  
 }
@@ -461,16 +435,6 @@ input[type="range"]::-ms-thumb {
 <div id="imageModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.85);">
   <span onclick="closeModal()" style="position:absolute; top:20px; right:30px; color:#fff; font-size:40px; cursor:pointer;">&times;</span>
   <img id="modalImage" style="max-width:90%; max-height:90%; margin:auto; display:block; position:absolute; top:0; bottom:0; left:0; right:0;">
-</div>
-
-<div id="splash-screen">
-  <div class="splash-content">
-    <h1>Ypsilanti, MI Green Infrastructure Toolkit (GrIT) Example</h1>
-    <p>AdaptGeo Consultants</p>
-    <div class="spinner" id="spinner"></div>
-
-    <button id="continue-btn" style="display: none;">Continue</button>
-  </div>
 </div>
 
 <!-- Adding an svg as the title bar can mess with the map... best to stick to png -->
@@ -2162,39 +2126,17 @@ var popup = new mapboxgl.Popup({
 const customLayerDefs = []; // Stores all custom layer definitions. Everytime a user selects a mapbox style (basemap), the map 
 // layers must be reloaded. We create the customLayerDefs list so that reloading the layers will not require executing the 
 // entire code loop below
-const splash = document.getElementById("splash-screen");
 const titlebar = null;
 const menuelement = document.getElementById("menu");
 
 
 map.on('load', function() {  // Once map loads, execute the nested function(s)
 
-
-
-    if (splash) {
-		// Hide spinner
-		document.getElementById('spinner').style.display = 'none';
-
-		// Show continue button
-		const continueBtn = document.getElementById('continue-btn');
-		continueBtn.style.display = 'inline-block';
-
-		// When button is clicked
-		continueBtn.addEventListener('click', () => {
-		  document.getElementById('splash-screen').remove();
-		  document.getElementById('map').classList.add('visible');
-		  if (titlebar) {
-			document.getElementById('title-bar').style.display = 'block'; }
-		  if (menuelement) {
-			document.getElementById('menu').style.display = 'block'; }
-		});
-	} else {
-			document.getElementById('map').classList.add('visible');
-			if (titlebar) {
-			  document.getElementById('title-bar').style.display = 'block'; }
-			if (menuelement) {
-			  document.getElementById('menu').style.display = 'block'; }
-		}
+	document.getElementById('map').classList.add('visible');
+	if (titlebar) {
+	  document.getElementById('title-bar').style.display = 'block'; }
+	if (menuelement) {
+	  document.getElementById('menu').style.display = 'block'; }
 
 	map.resize()
 
