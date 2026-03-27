@@ -215,6 +215,13 @@ html, body {
   cursor: pointer;
 }
 
+.mapboxgl-ctrl-bottom-right {
+  position: absolute !important;  /* needed for z-index to apply */
+  z-index: 99999 !important;       /* very high to beat other UI */
+  bottom: 25px !important; /* move it up from the bottom */
+  right: 10px !important;  /* optional, reassert position */
+}
+
 #map {
   top: 94px;   /* Adjust this to match the combined height of title bar and tabs... currently, this parameter is not working */
   visibility: hidden;  /* hide map initially */
@@ -462,7 +469,7 @@ input[type="range"]::-ms-thumb {
     <p>AdaptGeo Consultants</p>
     <div class="spinner" id="spinner"></div>
 
-    <button id="continue-btn" style="display: none;">Continue</button>
+    <button id="continue-btn" style="display: none;">Continu</button>
   </div>
 </div>
 
@@ -695,19 +702,7 @@ var map = new mapboxgl.Map({
 
 	// We use the id: in map.setPaintProperty() below
 
-const element = document.getElementById("aerial-opacity");
 
-if (element && map.getLayer('satellitestreets')) {
-  // The element exists — run your code here
-  console.log("Element found!");
-  // Example:
-  map.on('style.load', () => {  
-    document.getElementById('aerial-opacity').addEventListener('input', (e) => {
-    const opacity = parseFloat(e.target.value);
-    map.setPaintProperty('satellitestreets', 'raster-opacity', opacity);
-    });
-  });
-}
 
 // Create empty list for all to-be-defined variables such that the lists can later be looped through and the variables processed
 let tileset_source_list = [];  // Create empty list for tileset_source_##
