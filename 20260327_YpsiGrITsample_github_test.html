@@ -469,7 +469,7 @@ input[type="range"]::-ms-thumb {
     <p>AdaptGeo Consultants</p>
     <div class="spinner" id="spinner"></div>
 
-    <button id="continue-btn" style="display: none;">Continu</button>
+    <button id="continue-btn" style="display: none;">Continuuu</button>
   </div>
 </div>
 
@@ -2186,7 +2186,10 @@ const menuelement = document.getElementById("menu");
 
 map.on('load', function() {  // Once map loads, execute the nested function(s)
 
-
+	console.log("Map loaded. Check these variables:");
+	console.log("tileset_source_list length:", tileset_source_list.length);
+	console.log("customLayerDefs length:", customLayerDefs.length);
+	console.log("map.getStyle().sources:", Object.keys(map.getStyle().sources));
 
     if (splash) {
 		// Hide spinner
@@ -2257,6 +2260,11 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
 		}
 	}
 
+
+	console.log("Before processing layers - customLayerDefs.length:", customLayerDefs.length);
+	customLayerDefs.forEach((def, index) => {
+		console.log(`Layer ${index}:`, def.name || def.id || 'unnamed');
+	});
 
 	for (let i = 1; i <= tileset_source_list.length; i++) {  // We're simply establishing a counter here, so any list could be used
 
