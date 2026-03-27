@@ -30,6 +30,36 @@ html, body {
   height: 100%;
 }
 
+#splash-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000; /* above everything */
+  transition: opacity 0.5s ease;
+}
+
+#splash-screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Centered content box */
+.splash-content {
+  background: white;
+  padding: 2rem 3rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  max-width: 90%;
+}
+
 .spinner {
   width: 40px;
   height: 40px;
@@ -44,6 +74,13 @@ html, body {
   to {
     transform: rotate(360deg);
   }
+}
+
+#continue-btn {
+  margin-top: 1rem;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
 }
 
 #title-bar {
@@ -186,10 +223,10 @@ html, body {
 }
 
 #map {
-  position: absolute;
-  top: 0;
-  bottom: 0;
+  top: 94px;   /* Adjust this to match the combined height of title bar and tabs... currently, this parameter is not working */
+  visibility: hidden;  /* hide map initially */
   width: 100%;
+  height: 100%;  
 }
 
 
@@ -426,6 +463,16 @@ input[type="range"]::-ms-thumb {
   <img id="modalImage" style="max-width:90%; max-height:90%; margin:auto; display:block; position:absolute; top:0; bottom:0; left:0; right:0;">
 </div>
 
+<div id="splash-screen">
+  <div class="splash-content">
+    <h1>Ypsilanti, MI Green Infrastructure Toolkit (GrIT) Example</h1>
+    <p>AdaptGeo Consultants</p>
+    <div class="spinner" id="spinner"></div>
+
+    <button id="continue-btn" style="display: none;">Continue</button>
+  </div>
+</div>
+
 <!-- Adding an svg as the title bar can mess with the map... best to stick to png -->
 <!--     <div class="tab" data-tab="content2">Content 2</div> -->
 <div id="app">
@@ -437,7 +484,7 @@ input[type="range"]::-ms-thumb {
   </div> -->
 <div id="main-content">
 
-<div id="map" class="tab-content active"></div>
+<div id="map" class="tab-content active">
 
 <!-- It is not possible to nest html comments inside other comments.  Therefore, in order to be able to comment out the block 
 starting with <div id="menu">, I am writing all relevant comments before (rather than within) that block.
@@ -612,8 +659,7 @@ Surface Temp:
 This layer displays remotely estimated land surface temperature.  Red areas indicate hotter temperatures whereas blue areas indicate cooler.  Any red area can be considered a heat 
 island.</p>
 
-<a href="https://static1.squarespace.com/static/6379360069cad263aadee96b/t/6920a6eeba2e4661899bba97/1763747566314/20251121_AdaptGeo_LeisurevilleHeatAssessment.pdf" target="_blank">Leisureville Heat Report</a>
-
+</div>
 </div>
 
 <!-- <div id="content2" class="tab-content">
@@ -726,11 +772,7 @@ let checkbox_id_list = [];
 
 //const githubGeojsonUrl = 'https://raw.githubusercontent.com/AGgeoviz/AGgeoviz.github.io/89bfbe2e683b7f96dc889da5c2739c32b96c1af7/BBParcels_ParcelsWithinTargetAndBasins_20250714_EPSG4326.geojson';
 // githubGeojsonUrl is a MANDATORY parameter
-const githubGeojsonUrl = 'https://raw.githubusercontent.com/TwoPoint34/heca/8c69fa3a7c2ca920f8f0045b16cf4d508b45f94a/MoreParcelsWithAddress_20251006.geojsonl';
-// https://raw.githubusercontent.com/TwoPoint34/heca/8c69fa3a7c2ca920f8f0045b16cf4d508b45f94a/MoreParcelsWithAddress_20251006.geojsonl
-// https://raw.githubusercontent.com/TwoPoint34/heca/494df07ed4d4389d74474612e2a09990fa6c61ac/flowArrow4.png
-
-// https://raw.githubusercontent.com/TwoPoint34/TwoPoint34.github.io/7e71b1d7356d0804ee9c589c896e55e352606695/flowArrow4.png
+const githubGeojsonUrl = 'https://raw.githubusercontent.com/AGgeoviz/AGgeoviz.github.io/d50565d51e594e1208979a2ce6c58b392e9c4756/MoreParcelsWithAddress_20251006.geojsonl';
 const AddressSearchField = 'address';  // Make sure this matches your geojson property.
 const PlaceSearchField = null;  // Make sure this matches your geojson property
 //const flowarrowgeojson = 'https://raw.githubusercontent.com/AGgeoviz/AGgeoviz.github.io/refs/heads/main/StreamPointsWithBearing_20250825.geojsonl'
@@ -878,23 +920,23 @@ var raster_opacity_12 = null;  // Initial opacity setting if feature type (a mis
 var opacity_id_12 = null;  // Same ID as menu item name in <div class="menu-item"> above
 var checkbox_id_12 = null;  // Same id as in <input type="checkbox" id= ... > in <div class="menu-item"> in html above.
 
-var tileset_source_11 = null;
+var tileset_source_11 = 'flowarrow-tileset-source';
 	// This is where we create a name/object for the Mapbox GL JS tileset source. Any name should work.
-var tileset_layerid_11 = null;
+var tileset_layerid_11 = 'flowarrow-tileset-layer';
 	// This is where we create a name/object for the Mapbox GL JS tileset layer. Any name should work.  IF this layer is one of multiple layers that 
 	// are controlled by the same menu opacity slider (e.g. Boynton Beach tree canopy north and south), then the layer id must be 'partial-tileset-layer#'
-var tileset_name_11 = null;
+var tileset_name_11 = 'FinalPointsWithBearing_YpsiMo-ayths8';
 	// The name of the tileset as shown in the mapbox data manager under "Vector Layers"... also same as name in JSON recipe
-var tileset_type_11 = null;
+var tileset_type_11 = 'vector';
 	// 'vector' or 'raster'
-var tileset_id_11 = null;
+var tileset_id_11 = 'mapbox://adaptgeo.czcqvd6l';
 	// Tileset ID displayed in Mapbox by clicking on three dots to right of tileset name.  Hitting the copy button will copy only 
 	// adaptgeo.dpwbajhy, so mapbox:// must be appended
-var minzoom_11 = null;  // The minimum zoom level at which a layer will be displayed.  For example, a value of 12 here means layer will not be displayed at 11 or below
-var maxzoom_11 = null;  // The maximum zoom level at which a layer will be displayed.  For example, a value of 18 here means layer will not be displayed at 19 or above
+var minzoom_11 = 16;  // The minimum zoom level at which a layer will be displayed.  For example, a value of 12 here means layer will not be displayed at 11 or below
+var maxzoom_11 = 22;  // The maximum zoom level at which a layer will be displayed.  For example, a value of 18 here means layer will not be displayed at 19 or above
 	// If a minzoom value is entered, then maxzoom should not be left null.  If planning to use separate layers for various zoom layers, then the maxzoom value of one 
 	// layer should equal the minzoom value of the next (and vice versa) in order to avoid gaps (e.g. between maxzoom of 19 and minzoom of 20, 19.01 - 19.99 is skipped).
-var feature_type_11 = null;
+var feature_type_11 = 'symbol';
 	// 'circle' (point), 'line', 'fill' (polygon), 'raster', 'symbol', or other style options
 	// To represent point features as squares rather than circles, 'symbol' must be used. A vector icon must be created (such as in 
 	// GIMP) and saved as either an SDF PNG or SVG file. We create a new GIMP file and in advanced options we set "Fill with" to 
@@ -919,15 +961,9 @@ var circle_color_11 = null;
 	// Desired HEX color code
 var circle_opacity_11 = null;
 	// I believe this is the starting opacity, though 0.75 looks like 1 to me
-var icon_image_11 = null;  // The Name we give to our image. We use icon parameters only if using an SDF image (e.g. square, star) for
+var icon_image_11 = 'arrow-icon';  // The Name we give to our image. We use icon parameters only if using an SDF image (e.g. square, star) for
 	// point features
-var icon_url_11 = null;  // The TwoPoint34.github.io url works in squarespace... Raw image url... Must be sdf PNG
-	// flowArrow4.png
-	// https://raw.githubusercontent.com/TwoPoint34/TwoPoint34.github.io/7e71b1d7356d0804ee9c589c896e55e352606695/flowArrow4.png
-	// https://raw.githubusercontent.com/TwoPoint34/heca/494df07ed4d4389d74474612e2a09990fa6c61ac/flowArrow4.png
-	// https://raw.githubusercontent.com/TwoPoint34/heca/refs/heads/main/flowArrow4.png
-	// https://raw.githubusercontent.com/TwoPoint34/heca/main/flowArrow4.png?raw=true'
-	// https://raw.githubusercontent.com/AGgeoviz/AGgeoviz.github.io/66d5503f57bce5da3bc7c01b871f7b7b054e784f/flowArrow4.png' Cannot use icon from AGgeoviz when webpage is created in TwoPoint34
+var icon_url_11 = 'https://raw.githubusercontent.com/AGgeoviz/AGgeoviz.github.io/66d5503f57bce5da3bc7c01b871f7b7b054e784f/flowArrow4.png';  // Raw image url... Must be sdf PNG
 	// from github... url for square, star, triangle, and AdaptGeo logo below
 	// square = 'https://raw.githubusercontent.com/AGgeoviz/AGgeoviz.github.io/refs/heads/main/blacksquare1.png'
 	// star = 'https://raw.githubusercontent.com/AGgeoviz/AGgeoviz.github.io/refs/heads/main/blackstar.png'
@@ -941,18 +977,18 @@ var icon_url_11 = null;  // The TwoPoint34.github.io url works in squarespace...
 	// mikeflowarrowpng4 = 'https://raw.githubusercontent.com/AGgeoviz/AGgeoviz.github.io/66d5503f57bce5da3bc7c01b871f7b7b054e784f/flowArrow4.png'
 	// Occasionally, semi-transparent anti-aliasing around the edges can appear like overall opacity is lower, especially on 
 	// high-DPI screens or when downscaled.
-var icon_size_11 = null;  // Set our icon size... will likely just have to tinker with this value till it looks right
-var icon_color_11 = null;  // Set icon color
+var icon_size_11 = 0.75;  // Set our icon size... will likely just have to tinker with this value till it looks right
+var icon_color_11 = '#1c3664';  // Set icon color
 	// #d16a4a is AdaptGeo orange/red, #457953 is AdaptGeo green, #223C29 is darker green
-var icon_opacity_11 = null;  // Set our icon opacity
-var BearingField_11 = null;  // The name of the bearing/angle field in the flow direction point layer's attribute table
+var icon_opacity_11 = 1;  // Set our icon opacity
+var BearingField_11 = 'Bearing';  // The name of the bearing/angle field in the flow direction point layer's attribute table
 var raster_opacity_11 = null;
 	// Initial opacity setting if feature type (a misnomer?) is 'raster'
-var opacity_id_11 = null;
+var opacity_id_11 = 'bbstreams-opacity';
 	// Same id as in <input type="range" id= ... > in <div class="menu-item"> in html above.	
 	// IMPORTANT: IN ORDER FOR THE WEB MAP TO LOAD PROPERLY WHEN NO OPACITY SLIDER IS USED, var opacity_id_## SHOULD NOT BE null
 	// ENTERING ANY VALUE (e.g. 'empty') WILL WORK
-var checkbox_id_11 = null;  // Same id as in <input type="checkbox" id= ... > in <div class="menu-item"> in html above.
+var checkbox_id_11 = 'bbstreams-toggle';  // Same id as in <input type="checkbox" id= ... > in <div class="menu-item"> in html above.
 
 var tileset_source_14 = null;
 	// This is where we create a name/object for the Mapbox GL JS tileset source. Any name should work.
@@ -2115,17 +2151,39 @@ var popup = new mapboxgl.Popup({
 const customLayerDefs = []; // Stores all custom layer definitions. Everytime a user selects a mapbox style (basemap), the map 
 // layers must be reloaded. We create the customLayerDefs list so that reloading the layers will not require executing the 
 // entire code loop below
+const splash = document.getElementById("splash-screen");
 const titlebar = null;
 const menuelement = document.getElementById("menu");
 
 
 map.on('load', function() {  // Once map loads, execute the nested function(s)
 
-	document.getElementById('map').classList.add('visible');
-	if (titlebar) {
-	  document.getElementById('title-bar').style.display = 'block'; }
-	if (menuelement) {
-	  document.getElementById('menu').style.display = 'block'; }
+
+
+    if (splash) {
+		// Hide spinner
+		document.getElementById('spinner').style.display = 'none';
+
+		// Show continue button
+		const continueBtn = document.getElementById('continue-btn');
+		continueBtn.style.display = 'inline-block';
+
+		// When button is clicked
+		continueBtn.addEventListener('click', () => {
+		  document.getElementById('splash-screen').remove();
+		  document.getElementById('map').classList.add('visible');
+		  if (titlebar) {
+			document.getElementById('title-bar').style.display = 'block'; }
+		  if (menuelement) {
+			document.getElementById('menu').style.display = 'block'; }
+		});
+	} else {
+			document.getElementById('map').classList.add('visible');
+			if (titlebar) {
+			  document.getElementById('title-bar').style.display = 'block'; }
+			if (menuelement) {
+			  document.getElementById('menu').style.display = 'block'; }
+		}
 
 	map.resize()
 
@@ -3602,4 +3660,5 @@ The above link may contain useful information, though I figured most everything 
  
 "ypsirecpark_20250509_squarespace_1_WORKS.html" and other later Ypsi Rec Park scripts contain code for incorporating and sizing 
 an image into a popup when a user clicks a feature (e.g. parcel).  Refer to the map.on('click' block of the script.
+ 
  -->
