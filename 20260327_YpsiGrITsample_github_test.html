@@ -223,12 +223,12 @@ html, body {
 }
 
 #map {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 100%;
+  top: 94px;   /* Adjust this to match the combined height of title bar and tabs... currently, this parameter is not working */
   visibility: hidden;  /* hide map initially */
+  width: 100%;
+  height: 100%;  
 }
+
 
 #map.visible {
   visibility: visible; /* show map when ready */
@@ -469,7 +469,7 @@ input[type="range"]::-ms-thumb {
     <p>AdaptGeo Consultants</p>
     <div class="spinner" id="spinner"></div>
 
-    <button id="continue-btn" style="display: none;">Continuu</button>
+    <button id="continue-btn" style="display: none;">Continue</button>
   </div>
 </div>
 
@@ -773,7 +773,11 @@ let checkbox_id_list = [];
 
 //const githubGeojsonUrl = 'https://raw.githubusercontent.com/AGgeoviz/AGgeoviz.github.io/89bfbe2e683b7f96dc889da5c2739c32b96c1af7/BBParcels_ParcelsWithinTargetAndBasins_20250714_EPSG4326.geojson';
 // githubGeojsonUrl is a MANDATORY parameter
-const githubGeojsonUrl = 'https://raw.githubusercontent.com/AGgeoviz/AGgeoviz.github.io/d50565d51e594e1208979a2ce6c58b392e9c4756/MoreParcelsWithAddress_20251006.geojsonl';
+const githubGeojsonUrl = 'https://raw.githubusercontent.com/TwoPoint34/heca/8c69fa3a7c2ca920f8f0045b16cf4d508b45f94a/MoreParcelsWithAddress_20251006.geojsonl';
+// https://raw.githubusercontent.com/TwoPoint34/heca/8c69fa3a7c2ca920f8f0045b16cf4d508b45f94a/MoreParcelsWithAddress_20251006.geojsonl
+// https://raw.githubusercontent.com/TwoPoint34/heca/494df07ed4d4389d74474612e2a09990fa6c61ac/flowArrow4.png
+
+// https://raw.githubusercontent.com/TwoPoint34/TwoPoint34.github.io/7e71b1d7356d0804ee9c589c896e55e352606695/flowArrow4.png
 const AddressSearchField = 'address';  // Make sure this matches your geojson property.
 const PlaceSearchField = null;  // Make sure this matches your geojson property
 //const flowarrowgeojson = 'https://raw.githubusercontent.com/AGgeoviz/AGgeoviz.github.io/refs/heads/main/StreamPointsWithBearing_20250825.geojsonl'
