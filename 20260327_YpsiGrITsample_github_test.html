@@ -469,7 +469,7 @@ input[type="range"]::-ms-thumb {
     <p>AdaptGeo Consultants</p>
     <div class="spinner" id="spinner"></div>
 
-    <button id="continue-btn" style="display: none;">Continuuu</button>
+    <button id="continue-btn" style="display: none;">Continu</button>
   </div>
 </div>
 
@@ -2339,10 +2339,6 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
 		});
 	}
 
-	  if (iconurl != null && iconurl.trim().toLowerCase().endsWith('.svg')) {
-		loadSvgAsImage(iconurl, iconimage);
-	  }
-
 	    // Add tileset source (for both vectors and rasters)
 	  if (tilesource != null && tiletype != null && tileid != null) {  // Only execute code if source, type, and id variables are not blank/null
 		map.addSource(tilesource, {
@@ -3635,54 +3631,6 @@ map.on('error', (e) => {
     console.warn('Mapbox tile load error:', e.error.message);
   }
 });
-
-
-function loadSvgAsImage(iconurl, iconimage, callback) {
-  fetch(iconurl)
-    .then(response => response.text())
-    .then(svgText => {
-      const svgBlob = new Blob([svgText], { type: 'image/svg+xml' });
-      const DOMURL = window.URL || window.webkitURL || window;
-      const url = DOMURL.createObjectURL(svgBlob);
-
-      const img = new Image();
-      img.onload = function () {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-
-        const imageData = ctx.getImageData(0, 0, img.width, img.height);
-
-        map.addImage(iconimage, {
-          width: img.width,
-          height: img.height,
-          data: imageData.data
-        }, { sdf: true });
-
-        if (map.hasImage(iconimage)) {
-          console.log(`Icon '${iconimage}' is present in the map style.`);
-        } else {
-          console.warn(`Icon '${iconimage}' is NOT present in the map style.`);
-        }
-
-        if (callback) callback();
-
-        DOMURL.revokeObjectURL(url);
-      };
-
-      img.onerror = function () {
-        console.error("Failed to load SVG image from", url);
-        DOMURL.revokeObjectURL(url);
-      };
-
-      img.src = url;
-    })
-    .catch(err => console.error("Failed to fetch SVG:", err));
-}
-
-
 
 
 </script>
