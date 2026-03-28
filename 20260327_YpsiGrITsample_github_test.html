@@ -3,6 +3,13 @@
 STEPS TO PUBLISH AND FORMAT A MAPBOX GL JS WEB MAP IN SQUARESPACE 
 
 Since these steps are sort of I.P., I've copied them into the main GreenInfrastructureToolkit Python script
+
+It's worth noting that this script only works in SquareSpace. I spent the better part of 2 full days trying to get it to work in GitHub pages. Neither ChatGPT nor 
+GitHub Co-pilot were able to help. I suspect the failure in GitHub has something to do with map.loadImage not finishing prior to map.addLayer, but I tried excessively
+to fix that situation and failed. Honestly, the problem is likely something stupid, but it's very difficult to fix when no error codes are thrown. Even if I were to 
+get the map to work on GitHub, there's no guarantee that it would be performant at scale, which as I understand it is literally the only reason anyone would every use 
+MapBox. SquareSpace hosting it is, then, which is fine since SquareSpace is far more convenient for website development than GitHub Pages anyhow. If I ever want/need 
+to host a web map on GitHub, I'll just use Leaflet.
 -->
 
 <!DOCTYPE html>
@@ -469,7 +476,7 @@ input[type="range"]::-ms-thumb {
     <p>AdaptGeo Consultants</p>
     <div class="spinner" id="spinner"></div>
 
-    <button id="continue-btn" style="display: none;">Continuee</button>
+    <button id="continue-btn" style="display: none;">Continue</button>
   </div>
 </div>
 
@@ -676,27 +683,6 @@ island.</p>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 
 <script>
-
-// Add debugging to confirm DOM is ready
-console.log("Script starting, DOM readiness:", document.readyState);
-
-// Log the state at multiple points
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOMContentLoaded fired");
-});
-
-window.addEventListener('load', () => {
-    console.log("window.load fired");
-});
-
-// Check if menu element exists
-setTimeout(() => {
-    const menu = document.getElementById("menu");
-    const splashScreen = document.getElementById("splash-screen");
-    console.log("Menu element exists:", !!menu);
-    console.log("Splash screen element exists:", !!splashScreen);
-    console.log("All DOM elements ready:", !!menu && !!splashScreen);
-}, 100);
 
 const styles = {
   "Streets": "mapbox://styles/mapbox/streets-v12",
@@ -986,8 +972,7 @@ var circle_opacity_11 = null;
 	// I believe this is the starting opacity, though 0.75 looks like 1 to me
 var icon_image_11 = 'arrow-icon';  // The Name we give to our image. We use icon parameters only if using an SDF image (e.g. square, star) for
 	// point features
-var icon_url_11 = 'https://raw.githubusercontent.com/TwoPoint34/TwoPoint34.github.io/7e71b1d7356d0804ee9c589c896e55e352606695/flowArrow4.png';  // Raw image url... Must be sdf PNG
-	// https://raw.githubusercontent.com/AGgeoviz/AGgeoviz.github.io/66d5503f57bce5da3bc7c01b871f7b7b054e784f/flowArrow4.png
+var icon_url_11 = 'https://raw.githubusercontent.com/AGgeoviz/AGgeoviz.github.io/66d5503f57bce5da3bc7c01b871f7b7b054e784f/flowArrow4.png';  // Raw image url... Must be sdf PNG
 	// from github... url for square, star, triangle, and AdaptGeo logo below
 	// square = 'https://raw.githubusercontent.com/AGgeoviz/AGgeoviz.github.io/refs/heads/main/blacksquare1.png'
 	// star = 'https://raw.githubusercontent.com/AGgeoviz/AGgeoviz.github.io/refs/heads/main/blackstar.png'
@@ -2175,10 +2160,6 @@ var popup = new mapboxgl.Popup({
 const customLayerDefs = []; // Stores all custom layer definitions. Everytime a user selects a mapbox style (basemap), the map 
 // layers must be reloaded. We create the customLayerDefs list so that reloading the layers will not require executing the 
 // entire code loop below
-
-console.log("customLayerDefs length immediately after creation:", customLayerDefs.length);
-
-
 const splash = document.getElementById("splash-screen");
 const titlebar = null;
 const menuelement = document.getElementById("menu");
@@ -2186,10 +2167,7 @@ const menuelement = document.getElementById("menu");
 
 map.on('load', function() {  // Once map loads, execute the nested function(s)
 
-	console.log("Map loaded. Check these variables:");
-	console.log("tileset_source_list length:", tileset_source_list.length);
-	console.log("customLayerDefs length:", customLayerDefs.length);
-	console.log("map.getStyle().sources:", Object.keys(map.getStyle().sources));
+
 
     if (splash) {
 		// Hide spinner
@@ -2261,18 +2239,7 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
 	}
 
 
-	console.log("Before processing layers - customLayerDefs.length:", customLayerDefs.length);
-	customLayerDefs.forEach((def, index) => {
-		console.log(`Layer ${index}:`, def.name || def.id || 'unnamed');
-	});
-
 	for (let i = 1; i <= tileset_source_list.length; i++) {  // We're simply establishing a counter here, so any list could be used
-
-	  console.log("Before processing layers - customLayerDefs.length:", customLayerDefs.length);
-	  customLayerDefs.forEach((def, index) => {
-		  console.log(`Layer ${index}:`, def.name || def.id || 'unnamed');
-	  });
-
 
 	  const tilesource = window["tileset_source_" + i];
 	  const tiletype = window["tileset_type_" + i];
@@ -2328,25 +2295,23 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
 	  const checkboxid = window["checkbox_id_" + i];
 
 
+	  if (iconurl != null && iconurl.trim().toLowerCase().endsWith('.png')) {
 
-
-
-
-
-
-
-
-
-
-	if (iconurl != null && iconurl.trim().toLowerCase().endsWith('.png')) {
+		// Add sdf .png file for non-circle (e.g. square) point features
 		map.loadImage(iconurl, function(error, image) {
-			if (error) {
-				console.error(`Failed to load image from ${iconurl}:`, error);
-			} else {
-				map.addImage(iconimage, image, { sdf: true });
-				console.log(`Icon '${iconimage}' successfully added to map`);
-				
-				// ADD YOUR map.addLayer() CALL HERE, inside the callback
+		  if (error) throw error;
+		  map.addImage(iconimage, image, { sdf: true });
+		});
+		  if (map.hasImage(iconimage)) {
+			console.log(`Icon '${iconimage}' is present in the map style.`);
+		  } else {
+			console.warn(`Icon '${iconimage}' is NOT present in the map style. Did you call map.addImage()?`);
+		  }
+	  }
+
+	  if (iconurl != null && iconurl.trim().toLowerCase().endsWith('.svg')) {
+		loadSvgAsImage(iconurl, iconimage);
+	  }
 
 	    // Add tileset source (for both vectors and rasters)
 	  if (tilesource != null && tiletype != null && tileid != null) {  // Only execute code if source, type, and id variables are not blank/null
@@ -2356,1003 +2321,11 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
 		});
 	  }
 
-	  // In JavaScript, indentation has no effect on code logic. What matters are braces {} and semicolons ;
-	  // Add raster tileset layer
-	  if (tilesource != null && tilename != null && tilelayerid != null && featuretype != null &&
-		  rasteropacity != null && opacityid != null) {
 
-		// Only execute code if source, type, and id variables are not blank/null
-		map.addLayer({
-		  'id': tilelayerid,
-		  'type': featuretype,
-		  'source': tilesource,
-		  'paint': {
-		    'raster-opacity': rasteropacity
-		  }
-		});
 
 
-		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
-		customLayerDefs.push({
-		  id: tilelayerid,
-		  type: featuretype,
-		  source: {
-			id: tilesource,
-			type: tiletype,
-			url: tileid
-		  },
-		  'source-layer': tilename,
-		  paint: {
-			'raster-opacity': rasteropacity
-		  },
-		});
 
-
-		const checkbox = document.getElementById(checkboxid);
-		const slider = document.getElementById(opacityid); // Optional opacity slider
-		const layerId = tilelayerid;
-
-		// Store the last non-zero opacity (default to 1)
-		let lastOpacity = 1;
-
-		if (checkbox) {
-		  checkbox.addEventListener('change', () => {
-			if (!map.getLayer(layerId)) return;
-
-			if (checkbox.checked) {
-			  // Restore last known opacity
-			  map.setPaintProperty(layerId, 'raster-opacity', lastOpacity);
-			} else {
-			  // Store the current opacity before hiding
-			  const currentOpacity = map.getPaintProperty(layerId, 'raster-opacity');
-			  if (currentOpacity > 0) lastOpacity = currentOpacity;
-
-			  // Set layer opacity to 0
-			  map.setPaintProperty(layerId, 'raster-opacity', 0);
-			}
-
-			// Enable or disable the slider, but do NOT change its value
-			if (slider) slider.disabled = !checkbox.checked;
-		  });
-		}
-
-		
-		// Raster layer opacity control
-		var LayerOpacity = document.getElementById(opacityid);
-		if (LayerOpacity) {
-		LayerOpacity.addEventListener('input', function(e) {
-			var opacity = parseFloat(e.target.value, 10) / 100;
-			map.setPaintProperty(tilelayerid, 'raster-opacity', opacity);
-			setLayerVisibility(tilelayerid, opacity);
-		});		  
-		}
-	  }
-        }
-    });
-}
-
-
-	  // In JavaScript, indentation has no effect on code logic. What matters are braces {} and semicolons ;	  
-	  // Add vector tileset layer (points, circles)
-	  if (tilesource != null && tilename != null && tilelayerid != null && featuretype != null &&
-		  circleradius != null && circlecolor != null && circleopacity != null && opacityid != null) {
-
-		// Only execute code if source, type, and id variables are not blank/null
-		map.addLayer({
-		  'id': tilelayerid,
-		  'type': featuretype,
-		  'source': tilesource,
-		  'source-layer': tilename,
-		  'paint': {
-			'circle-radius': circleradius,
-			'circle-color': circlecolor,
-			'circle-opacity': circleopacity
-		  }
-		});
-		
-
-		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
-		customLayerDefs.push({
-		  id: tilelayerid,
-		  type: featuretype,
-		  source: {
-			id: tilesource,
-			type: tiletype,
-			url: tileid
-		  },
-		  'source-layer': tilename,
-		  paint: {
-			'circle-radius': circleradius,
-			'circle-color': circlecolor,
-			'circle-opacity': circleopacity
-		  },
-		});
-
-
-		const checkbox = document.getElementById(checkboxid);
-		const slider = document.getElementById(opacityid); // Optional opacity slider
-		const layerId = tilelayerid;
-
-		// Store the last non-zero opacity (default to 1)
-		let lastOpacity = 1;
-
-		if (checkbox) {
-		  checkbox.addEventListener('change', () => {
-			if (!map.getLayer(layerId)) return;
-
-			if (checkbox.checked) {
-			  // Restore last known opacity
-			  map.setPaintProperty(layerId, 'circle-opacity', lastOpacity);
-			} else {
-			  // Store the current opacity before hiding
-			  const currentOpacity = map.getPaintProperty(layerId, 'circle-opacity');
-			  if (currentOpacity > 0) lastOpacity = currentOpacity;
-
-			  // Set layer opacity to 0
-			  map.setPaintProperty(layerId, 'circle-opacity', 0);
-			}
-
-			// Enable or disable the slider, but do NOT change its value
-			if (slider) slider.disabled = !checkbox.checked;
-		  });
-		}
-
-
-		// Vector layer opacity control
-		var LayerOpacity = document.getElementById(opacityid);
-		if (LayerOpacity) {
-		LayerOpacity.addEventListener('input', function(e) {
-			var opacity = parseFloat(e.target.value, 10) / 100;
-			map.setPaintProperty(tilelayerid, 'circle-opacity', opacity);
-			setLayerVisibility(tilelayerid, opacity);
-		});
-		}
-	  }
-
-	  // In JavaScript, indentation has no effect on code logic. What matters are braces {} and semicolons ;
-	  // Add vector tileset layer (points, symbols)
-	  if (tilesource != null && tilename != null && tilelayerid != null && featuretype != null && iconimage != null && iconsize != null 
-		&& iconcolor != null && iconopacity != null && opacityid != null && bearingfield == null) {
-
-		// Only execute code if source, type, and id variables are not blank/null
-		map.addLayer({
-		  'id': tilelayerid,
-		  'type': featuretype,
-		  'source': tilesource,
-		  'source-layer': tilename,
-		  'layout': {
-			'icon-image': iconimage,
-			'icon-size': iconsize
-		  },
-		  'paint': {
-			'icon-color': iconcolor,
-			'icon-opacity': iconopacity
-		  }
-		});
-
-
-		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
-		customLayerDefs.push({
-		  id: tilelayerid,
-		  type: featuretype,
-		  source: {
-			id: tilesource,
-			type: tiletype,
-			url: tileid
-		  },
-		  'source-layer': tilename,
-		  paint: {
-			'icon-color': iconcolor,
-			'icon-opacity': iconopacity
-		  },
-		  icon: {
-			name: iconimage,
-			url: iconurl
-		  },
-		  layout: { 
-			'icon-image': iconimage,
-			'icon-size': iconsize		  
-		  },
-		});
-
-
-		const checkbox = document.getElementById(checkboxid);
-		const slider = document.getElementById(opacityid); // Optional opacity slider
-		const layerId = tilelayerid;
-
-		// Store the last non-zero opacity (default to 1)
-		let lastOpacity = 1;
-
-		if (checkbox) {
-		  checkbox.addEventListener('change', () => {
-			if (!map.getLayer(layerId)) return;
-
-			if (checkbox.checked) {
-			  // Restore last known opacity
-			  map.setPaintProperty(layerId, 'icon-opacity', lastOpacity);
-			} else {
-			  // Store the current opacity before hiding
-			  const currentOpacity = map.getPaintProperty(layerId, 'icon-opacity');
-			  if (currentOpacity > 0) lastOpacity = currentOpacity;
-
-			  // Set layer opacity to 0
-			  map.setPaintProperty(layerId, 'icon-opacity', 0);
-			}
-
-			// Enable or disable the slider, but do NOT change its value
-			if (slider) slider.disabled = !checkbox.checked;
-		  });
-		}
-
-	
-		// Vector layer opacity control
-		var LayerOpacity = document.getElementById(opacityid);
-		if (LayerOpacity) {
-		LayerOpacity.addEventListener('input', function(e) {
-			var opacity = parseFloat(e.target.value, 10) / 100;
-			map.setPaintProperty(tilelayerid, 'icon-opacity', opacity);
-			setLayerVisibility(tilelayerid, opacity);
-		});
-		}
-	  }
-
-console.log({
-  tilesource,
-  tilename,
-  tilelayerid,
-  featuretype,
-  iconimage,
-  iconsize,
-  iconcolor,
-  iconopacity,
-  opacityid,
-  bearingfield,
-  minzoom,
-  maxzoom
-});
-
-
-
-	  // In JavaScript, indentation has no effect on code logic. What matters are braces {} and semicolons ;
-	  // Add vector tileset layer (points, symbols)
-	  if (tilesource != null && tilename != null && tilelayerid != null && featuretype != null && iconimage != null && iconsize != null && iconcolor != null 
-		&& iconopacity != null && opacityid != null && bearingfield != null  && minzoom != null && maxzoom != null) {
-
-		console.log('minzoom:', minzoom);
-		console.log('maxzoom:', maxzoom);
-
-		// Only execute code if source, type, and id variables are not blank/null
-		map.addLayer({
-		  'id': tilelayerid,
-		  'type': featuretype,
-		  'source': tilesource,
-		  'minzoom': minzoom,
-		  'maxzoom': maxzoom,
-		  'source-layer': tilename,
-		  'layout': {
-			'icon-image': iconimage,
-//			'icon-size': iconsize,
-			'icon-size': iconsize, // [
-//			  'interpolate',
-//			  ['linear'], ['zoom'],
-//			  15, 0.5,
-//			  22, 1.5
-//			],
-			'icon-rotate': ['-', ['get', bearingfield], 90],  // No idea why, but must rotate counter-clockwise 90 degrees
-			'icon-rotation-alignment': 'map',     // ensures rotation follows map orientation
-			'icon-allow-overlap': true
-		  },
-		  'paint': {
-			'icon-color': iconcolor,
-			'icon-opacity': iconopacity
-		  }
-		});
-
-
-		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
-		customLayerDefs.push({
-		  id: tilelayerid,
-		  type: featuretype,
-		  source: {
-			id: tilesource,
-			type: tiletype,
-			url: tileid
-		  },
-		  'minzoom': minzoom,
-		  'maxzoom': maxzoom,
-		  'source-layer': tilename,
-		  paint: {
-			'icon-color': iconcolor,
-			'icon-opacity': iconopacity
-		  },
-		  icon: {
-			name: iconimage,
-			url: iconurl
-		  },
-		  layout: { 
-			'icon-image': iconimage,
-			'icon-size': iconsize,	  
-			'icon-rotate': ['-', ['get', bearingfield], 90],  // No idea why, but must rotate counter-clockwise 90 degrees
-			'icon-rotation-alignment': 'map',     // ensures rotation follows map orientation
-			'icon-allow-overlap': true
-		  },
-		});
-
-
-		const checkbox = document.getElementById(checkboxid);
-		const slider = document.getElementById(opacityid); // Optional opacity slider
-		const layerId = tilelayerid;
-
-		// Store the last non-zero opacity (default to 1)
-		let lastOpacity = 1;
-
-		if (checkbox) {
-		  checkbox.addEventListener('change', () => {
-			if (!map.getLayer(layerId)) return;
-
-			if (checkbox.checked) {
-			  // Restore last known opacity
-			  map.setPaintProperty(layerId, 'icon-opacity', lastOpacity);
-			} else {
-			  // Store the current opacity before hiding
-			  const currentOpacity = map.getPaintProperty(layerId, 'icon-opacity');
-			  if (currentOpacity > 0) lastOpacity = currentOpacity;
-
-			  // Set layer opacity to 0
-			  map.setPaintProperty(layerId, 'icon-opacity', 0);
-			}
-
-			// Enable or disable the slider, but do NOT change its value
-			if (slider) slider.disabled = !checkbox.checked;
-		  });
-		}
-
-	
-		// Vector layer opacity control
-		var LayerOpacity = document.getElementById(opacityid);
-		if (LayerOpacity) {
-		LayerOpacity.addEventListener('input', function(e) {
-			var opacity = parseFloat(e.target.value, 10) / 100;
-			map.setPaintProperty(tilelayerid, 'icon-opacity', opacity);
-			setLayerVisibility(tilelayerid, opacity);
-		});
-		}
-	  }
-
-
-
-	  // In JavaScript, indentation has no effect on code logic. What matters are braces {} and semicolons ;
-	  // Add vector tileset layer (lines)
-	  if (tilesource != null && tilename != null && tilelayerid != null && featuretype != null &&
-		  linecolor != null && linewidth != null && lineopacity != null && opacityid != null) {
-
-		// Only execute code if source, type, and id variables are not blank/null
-		map.addLayer({
-		  'id': tilelayerid,
-		  'type': featuretype,
-		  'source': tilesource,
-		  'source-layer': tilename,
-		  'layout': {
-			'line-join': 'round',
-			'line-cap': 'round'
-		  },
-		  'paint': {
-			'line-color': linecolor,
-			'line-width': linewidth,
-			'line-opacity': lineopacity
-		  }
-		});
-
-
-		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
-		customLayerDefs.push({
-		  id: tilelayerid,
-		  type: featuretype,
-		  source: {
-			id: tilesource,
-			type: tiletype,
-			url: tileid
-		  },
-		  'source-layer': tilename,
-		  paint: {
-			'line-color': linecolor,
-			'line-width': linewidth,
-			'line-opacity': lineopacity
-		  },
-		});
-
-
-		const checkbox = document.getElementById(checkboxid);
-		const slider = document.getElementById(opacityid); // Optional opacity slider
-		const layerId = tilelayerid;
-
-		// Store the last non-zero opacity (default to 1)
-		let lastOpacity = 1;
-
-		if (checkbox) {
-		  checkbox.addEventListener('change', () => {
-			if (!map.getLayer(layerId)) return;
-
-			if (checkbox.checked) {
-			  // Restore last known opacity
-			  map.setPaintProperty(layerId, 'line-opacity', lastOpacity);
-			} else {
-			  // Store the current opacity before hiding
-			  const currentOpacity = map.getPaintProperty(layerId, 'line-opacity');
-			  if (currentOpacity > 0) lastOpacity = currentOpacity;
-
-			  // Set layer opacity to 0
-			  map.setPaintProperty(layerId, 'line-opacity', 0);
-			}
-
-			// Enable or disable the slider, but do NOT change its value
-			if (slider) slider.disabled = !checkbox.checked;
-		  });
-		}
-
-		
-		// Vector layer opacity control
-		var LayerOpacity = document.getElementById(opacityid);
-		if (LayerOpacity) {
-		LayerOpacity.addEventListener('input', function(e) {
-			var opacity = parseFloat(e.target.value, 10) / 100;
-			map.setPaintProperty(tilelayerid, 'line-opacity', opacity);
-			setLayerVisibility(tilelayerid, opacity);
-		});	  
-		}
-	  }
-
-	  // In JavaScript, indentation has no effect on code logic. What matters are braces {} and semicolons ;
-	  // Add vector tileset layer (lines, where line width is interpolated (e.g. stream network))
-	  if (tilesource != null && tilename != null && tilelayerid != null && featuretype != null && linecolor != null 
-		  && lineopacity != null && lineinterpolfield != null && lineWidthExpression != null && opacityid != null) {
-
-		// Only execute code if source, type, and id variables are not blank/null
-		map.addLayer({
-		  'id': tilelayerid,
-		  'type': featuretype,
-		  'source': tilesource,
-		  //'minzoom': 19,   This minzoom does not work
-		  //'maxzoom': 22,
-		  'source-layer': tilename,
-		  'paint': {
-			'line-color': linecolor,
-			'line-width': lineWidthExpression,
-			'line-opacity': lineopacity
-		  }
-		});
-
-
-
-	    // Add the manual zoom logic HERE
-	    map.on('zoom', () => {
-		  const zoom = map.getZoom();
-
-		  if (zoom < minzoom || zoom > maxzoom) {
-		    map.setLayoutProperty(tilelayerid, 'visibility', 'none');
-		  } else {
-		    map.setLayoutProperty(tilelayerid, 'visibility', 'visible');
-		  }
-	    });
-
-
-
-		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
-		customLayerDefs.push({
-		  id: tilelayerid,
-		  type: featuretype,
-		  source: {
-			id: tilesource,
-			type: tiletype,
-			url: tileid
-		  },
-		  'source-layer': tilename,
-		  paint: {
-			'line-color': linecolor,
-			'line-width': lineWidthExpression,
-			'line-opacity': lineopacity
-		  },
-		});
-
-
-		const checkbox = document.getElementById(checkboxid);
-		const slider = document.getElementById(opacityid); // Optional opacity slider
-		const layerId = tilelayerid;
-
-		// Store the last non-zero opacity (default to 1)
-		let lastOpacity = 1;
-
-		if (checkbox) {
-		  checkbox.addEventListener('change', () => {
-			if (!map.getLayer(layerId)) return;
-
-			if (checkbox.checked) {
-			  // Restore last known opacity
-			  map.setPaintProperty(layerId, 'line-opacity', lastOpacity);
-			} else {
-			  // Store the current opacity before hiding
-			  const currentOpacity = map.getPaintProperty(layerId, 'line-opacity');
-			  if (currentOpacity > 0) lastOpacity = currentOpacity;
-
-			  // Set layer opacity to 0
-			  map.setPaintProperty(layerId, 'line-opacity', 0);
-			}
-
-			// Enable or disable the slider, but do NOT change its value
-			if (slider) slider.disabled = !checkbox.checked;
-		  });
-		}
-		
-		
-		// Vector layer opacity control
-		var LayerOpacity = document.getElementById(opacityid);
-		if (LayerOpacity) {
-		LayerOpacity.addEventListener('input', function(e) {
-			var opacity = parseFloat(e.target.value, 10) / 100;
-			map.setPaintProperty(tilelayerid, 'line-opacity', opacity);
-			setLayerVisibility(tilelayerid, opacity);
-		});		  
-		}
-	  }
-
-
-	  // In JavaScript, indentation has no effect on code logic. What matters are braces {} and semicolons ;
-	  // Add vector tileset layer (lines, where line width is interpolated (e.g. stream network))
-	  if (tilesource != null && tilename != null && tilelayerid != null && featuretype != null && lineopacity != null 
-		  && linewidth != null && lineinterpolfield != null && lineColorExpression != null && opacityid != null) {
-
-		// Only execute code if source, type, and id variables are not blank/null
-		map.addLayer({
-		  'id': tilelayerid,
-		  'type': featuretype,
-		  'source': tilesource,
-		  'source-layer': tilename,
-		  'paint': {
-			'line-color': lineColorExpression,
-			'line-width': linewidth,
-			'line-opacity': lineopacity
-		  }
-		});
-
-
-
-	    // Add the manual zoom logic HERE
-	    map.on('zoom', () => {
-		  const zoom = map.getZoom();
-
-		  if (zoom < minzoom || zoom > maxzoom) {
-		    map.setLayoutProperty(tilelayerid, 'visibility', 'none');
-		  } else {
-		    map.setLayoutProperty(tilelayerid, 'visibility', 'visible');
-		  }
-	    });
-
-
-
-
-		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
-		customLayerDefs.push({
-		  id: tilelayerid,
-		  type: featuretype,
-		  source: {
-			id: tilesource,
-			type: tiletype,
-			url: tileid
-		  },
-		  'source-layer': tilename,
-		  paint: {
-			'line-color': lineColorExpression,
-			'line-width': linewidth,
-			'line-opacity': lineopacity
-		  },
-		});
-
-
-		const checkbox = document.getElementById(checkboxid);
-		const slider = document.getElementById(opacityid); // Optional opacity slider
-		const layerId = tilelayerid;
-
-		// Store the last non-zero opacity (default to 1)
-		let lastOpacity = 1;
-
-		if (checkbox) {
-		  checkbox.addEventListener('change', () => {
-			if (!map.getLayer(layerId)) return;
-
-			if (checkbox.checked) {
-			  // Restore last known opacity
-			  map.setPaintProperty(layerId, 'line-opacity', lastOpacity);
-			} else {
-			  // Store the current opacity before hiding
-			  const currentOpacity = map.getPaintProperty(layerId, 'line-opacity');
-			  if (currentOpacity > 0) lastOpacity = currentOpacity;
-
-			  // Set layer opacity to 0
-			  map.setPaintProperty(layerId, 'line-opacity', 0);
-			}
-
-			// Enable or disable the slider, but do NOT change its value
-			if (slider) slider.disabled = !checkbox.checked;
-		  });
-		}
-		
-		
-		// Vector layer opacity control
-		var LayerOpacity = document.getElementById(opacityid);
-		if (LayerOpacity) {
-		LayerOpacity.addEventListener('input', function(e) {
-			var opacity = parseFloat(e.target.value, 10) / 100;
-			map.setPaintProperty(tilelayerid, 'line-opacity', opacity);
-			setLayerVisibility(tilelayerid, opacity);
-		});		  
-		}
-	  }
-
-
-//		if (tilelayerid != null && lineopacity != null  && opacityid != null
-//		&& (tilelayerid === 'bbstreams-tileset-layer' || tilelayerid === 'flowdirection-tileset-layer')) {			
-
-			// Vector layer opacity control
-//			var LayerOpacity = document.getElementById(opacityid);
-//			if (LayerOpacity) {
-//			LayerOpacity.addEventListener('input', function(e) {
-//				var opacity = parseFloat(e.target.value, 10) / 100;
-				
-				// Update opacity for the first layer... I have hard-coded the runoff channels layer because I believe the need to control 
-				// multiple layers with a single opacity slider to be uncommon
-//				map.setPaintProperty('bbstreams-tileset-layer', 'line-opacity', opacity);
-//				setLayerVisibility('bbstreams-tileset-layer', opacity);
-
-				// Update opacity for the second layer... I have hard-coded the flow direction layer because I believe the need to control 
-				// multiple layers with a single opacity slider to be uncommon
-//				map.setPaintProperty('flowdirection-tileset-layer', 'icon-opacity', opacity);
-//				setLayerVisibility('flowdirection-tileset-layer', opacity);
-//			});
-//			}
-//		}
-
-
-
-	  // In JavaScript, indentation has no effect on code logic. What matters are braces {} and semicolons ;	  
-	  // Add vector tileset layer (polygons)
-	  if (tilesource != null && tilename != null && tilelayerid != null && featuretype != null &&
-		  fillcolor != null && filloutline != null && fillopacity != null && opacityid != null) {
-
-		// Only execute code if source, type, and id variables are not blank/null
-		// The commented-out 'fill-color' block colorizes parcels based on fields/attributes. I had initially hard-coded values 
-		// to colorize city-owned Boynton Beach parcels, and I've left in the code as an example if we choose to do so in the future.
-		map.addLayer({
-		  'id': tilelayerid,
-		  'type': featuretype,
-		  'source': tilesource,
-		  'source-layer': tilename,
-		  'paint': {
-		    'fill-color': fillcolor,
-//			'fill-color': [
-//				  'match',
-//				  ['get', 'OWNER_NAME'],
-//				  'BOYNTON BEACH CITY OF', '#8B2500',
-//				  /* default, non-city-owned parcels */ fillcolor
-//				],
-			'fill-outline-color': filloutline,
-			'fill-opacity': fillopacity
-		  }
-		});
-
-		customLayerDefs.push({
-		  id: tilelayerid,
-		  type: featuretype,
-		  source: {
-			id: tilesource,
-			type: tiletype,
-			url: tileid
-		  },
-		  'source-layer': tilename,
-		  paint: {
-			'fill-color': fillcolor,
-			'fill-outline-color': filloutline,
-			'fill-opacity': fillopacity
-		  },
-		});
-
-			const checkbox = document.getElementById(checkboxid);
-			const slider = document.getElementById(opacityid); // Optional opacity slider
-			const layerId = tilelayerid;
-
-			// Store the last non-zero opacity (default to 1)
-			let lastOpacity = 1;
-
-			if (checkbox) {
-			  checkbox.addEventListener('change', () => {
-				if (!map.getLayer(layerId)) return;
-
-				if (checkbox.checked) {
-				  // Restore last known opacity
-				  map.setPaintProperty(layerId, 'fill-opacity', lastOpacity);
-				} else {
-				  // Store the current opacity before hiding
-				  const currentOpacity = map.getPaintProperty(layerId, 'fill-opacity');
-				  if (currentOpacity > 0) lastOpacity = currentOpacity;
-
-				  // Set layer opacity to 0
-				  map.setPaintProperty(layerId, 'fill-opacity', 0);
-				}
-
-				// Enable or disable the slider, but do NOT change its value
-				if (slider) slider.disabled = !checkbox.checked;
-			  });
-			}
-	  }
-
-	  	if (tilelayerid != null && fillopacity != null  && opacityid != null && tilelayerid != 'partial-tileset-layer1' 
-		&& tilelayerid != 'partial-tileset-layer2') {  
-		// Only execute code if source, type, and id variables are not blank/null
-			
-			
-			// Vector layer opacity control
-			var LayerOpacity = document.getElementById(opacityid);
-			if (LayerOpacity) {
-			LayerOpacity.addEventListener('input', function(e) {
-				var opacity = parseFloat(e.target.value, 10) / 100;
-				map.setPaintProperty(tilelayerid, 'fill-opacity', opacity);
-				setLayerVisibility(tilelayerid, opacity);
-			});		  
-			}
-		}
-
-		if (tilelayerid != null && fillopacity != null  && opacityid != null
-		&& (tilelayerid === 'partial-tileset-layer1' || tilelayerid === 'partial-tileset-layer2')) {
-		//if (tilelayerid != null && tilelayerid === 'partial-tileset-layer1' || tilelayerid === 'partial-tileset-layer2') {  // || is "or"
-			
-
-			// Vector layer opacity control
-			var LayerOpacity = document.getElementById(opacityid);
-			if (LayerOpacity) {
-			LayerOpacity.addEventListener('input', function(e) {
-				var opacity = parseFloat(e.target.value, 10) / 100;
-				
-				// Update opacity for the first layer... I have hard-coded the trees layers because I believe the need to control 
-				// multiple layers with a single opacity slider to be uncommon
-				map.setPaintProperty('partial-tileset-layer1', 'fill-opacity', opacity);
-				setLayerVisibility('partial-tileset-layer1', opacity);
-
-				// Update opacity for the second layer... I have hard-coded the trees layers because I believe the need to control 
-				// multiple layers with a single opacity slider to be uncommon
-				map.setPaintProperty('partial-tileset-layer2', 'fill-opacity', opacity);
-				setLayerVisibility('partial-tileset-layer2', opacity);
-			});
-			}
-		}
-
-
-	  	if (tilelayerid != null && fillopacity != null  && opacityid != null && tilelayerid != 'partial-tileset-layer3' 
-		&& tilelayerid != 'partial-tileset-layer4') {  
-		// Only execute code if source, type, and id variables are not blank/null
-
-		
-			// Vector layer opacity control
-			var LayerOpacity = document.getElementById(opacityid);
-			if (LayerOpacity) {
-			LayerOpacity.addEventListener('input', function(e) {
-				var opacity = parseFloat(e.target.value, 10) / 100;
-				map.setPaintProperty(tilelayerid, 'fill-opacity', opacity);
-				setLayerVisibility(tilelayerid, opacity);
-			});		  
-			}
-		}
-
-		if (tilelayerid != null && fillopacity != null  && opacityid != null
-		&& (tilelayerid === 'partial-tileset-layer3' || tilelayerid === 'partial-tileset-layer4')) {
-		//if (tilelayerid != null && tilelayerid === 'partial-tileset-layer3' || tilelayerid === 'partial-tileset-layer4') {  // || is "or"
-
-
-			// Vector layer opacity control
-			var LayerOpacity = document.getElementById(opacityid);
-			if (LayerOpacity) {
-			LayerOpacity.addEventListener('input', function(e) {
-				var opacity = parseFloat(e.target.value, 10) / 100;
-				
-				// Update opacity for the first layer
-				map.setPaintProperty('partial-tileset-layer3', 'fill-opacity', opacity);
-				setLayerVisibility('partial-tileset-layer3', opacity);
-
-				// Update opacity for the second layer
-				map.setPaintProperty('partial-tileset-layer4', 'fill-opacity', opacity);
-				setLayerVisibility('partial-tileset-layer4', opacity);
-			});
-			}
-		}
-	}
-	
-	map.on('click', async function (e) {
-	  popup.remove();
-
-	  // Ensure geojsonData is loaded
-	  if (!geojsonData) {
-		try {
-		  await loadGeojson();
-		} catch (err) {
-		  console.error('Error loading GeoJSON for click:', err);
-		  return;
-		}
-	  }
-
-	  if (!geojsonData || !geojsonData.features) {
-		console.warn('GeoJSON data not available for click interaction.');
-		return;
-	  }
-
-	  const clickPoint = turf.point([e.lngLat.lng, e.lngLat.lat]);
-
-	  const matchingFeature = geojsonData.features.find(feature =>
-		turf.booleanPointInPolygon(clickPoint, feature)
-	  );
-
-	  if (matchingFeature) {
-		const props = matchingFeature.properties;
-		const placeName = props[PlaceSearchField];
-		const address = props[AddressSearchField];
-
-		const trimmedPlace = placeName?.trim();
-		const trimmedAddress = address?.trim();
-
-		let popupHTML = '';
-
-		if (trimmedPlace) {
-		  popupHTML += `<strong>Name:</strong> ${trimmedPlace}<br>`;
-		}
-
-		if (trimmedAddress) {
-		  popupHTML += `<strong>Address:</strong> ${trimmedAddress}`;
-		}
-
-		// If neither field is present, show fallback message
-		if (!popupHTML) {
-		  popupHTML = `<em>No address found</em>`;
-		}
-
-		const clickLocation = [e.lngLat.lng, e.lngLat.lat];
-
-		popup
-		  .setLngLat(clickLocation)
-		  .setHTML(popupHTML)
-		  .addTo(map);
-	  }
-	});
-  })
-
-
-function applyZoomVisibility() {
-  const currentZoom = map.getZoom();
-
-  for (const layerDef of customLayerDefs) {
-    const layerId = layerDef.id;
-
-    // Skip layers that don't define minzoom or maxzoom
-    if (typeof layerDef.minzoom !== 'number' && typeof layerDef.maxzoom !== 'number') {
-      continue;
-    }
-
-    const minzoom = layerDef.minzoom ?? -Infinity;
-    const maxzoom = layerDef.maxzoom ?? Infinity;
-
-    if (map.getLayer(layerId)) {
-      const visibility = currentZoom >= minzoom && currentZoom <= maxzoom ? 'visible' : 'none';
-      map.setLayoutProperty(layerId, 'visibility', visibility);
-    }
-  }
-}
-
-map.on('zoom', applyZoomVisibility);
-
-
-let geojsonData = null;  // I don't understand this, but it works
-let fuse = null;  // I don't understand this, but it works
-
-// Normalizes user address input so that it can be somewhat fuzzy (e.g. "first" or "1st")
-function normalizeAddress(str) {
-  if (!str || typeof str !== 'string') return ''; // <== prevents crash
-
-  const ordinals = {
-    first: '1st',
-    second: '2nd',
-    third: '3rd',
-    fourth: '4th',
-    fifth: '5th',
-    sixth: '6th',
-    seventh: '7th',
-    eighth: '8th',
-    ninth: '9th',
-    tenth: '10th'
-  };
-
-  return str.toLowerCase()
-    .replace(/\bnorthwest\b/g, 'nw')
-    .replace(/\bsouthwest\b/g, 'sw')
-    .replace(/\bnortheast\b/g, 'ne')
-    .replace(/\bsoutheast\b/g, 'se')
-    .replace(/\bnorth\b/g, 'n')
-    .replace(/\bsouth\b/g, 's')
-    .replace(/\beast\b/g, 'e')
-    .replace(/\bwest\b/g, 'w')
-    .replace(/\bstreet\b/g, 'st')
-    .replace(/\bavenue\b/g, 'ave')
-    .replace(/\bdrive\b/g, 'dr')
-    .replace(/\bboulevard\b/g, 'blvd')
-    .replace(/\bplace\b/g, 'pl')
-    .replace(/\broad\b/g, 'rd')
-    .replace(/\bcourt\b/g, 'ct')
-    .replace(/\blane\b/g, 'ln')
-    .replace(/\./g, '')
-    .replace(/\b(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\b/g, (match) => ordinals[match])
-    .replace(/\b(\d+)(st|nd|rd|th)\b/g, '$1')
-    .trim();
-}
-
-
-async function loadGeojson() {
-  try {
-    const res = await fetch(githubGeojsonUrl);
-    geojsonData = await res.json();
-
-    // Add normalized address property for Fuse
-    geojsonData.features.forEach(f => {
-      f.normalizedAddress = normalizeAddress(f.properties[AddressSearchField]);
-	  f.normalizedPlaceName = normalizeAddress(f.properties[PlaceSearchField]);
-    });
-
-    // Add source and layer if not already added
-    if (!map.getSource('geojson-source')) {
-      map.addSource('geojson-source', {
-        type: 'geojson',
-        data: geojsonData
-      });
-
-      map.addLayer({
-        id: 'geojson-layer',
-        type: 'fill',  // Since polygon data
-        source: 'geojson-source',
-        paint: {
-          'fill-color': '#FFFFFF',
-          'fill-outline-color': '#FFFFFF',
-          'fill-opacity': 0.01
-        }
-      });
-    }
-
-
-    // Create Fuse on normalizedAddress field.  Not sure if I need Fuse, since threshold is set to 0 and I've defined normalization
-	// rules in the normalizeAddress() function above, but code is currently based on Fuze and works, so I'll keep it in
-    fuse = new Fuse(geojsonData.features, {
-      keys: ['normalizedAddress', 'normalizedPlaceName'],
-      threshold: 0,
-	  includeMatches: true,
-      ignoreLocation: true,
-      minMatchCharLength: 2
-    });
-
-  } catch (err) {
-    console.error('Error loading GeoJSON:', err);
-    alert('Failed to load data for search.');
-  }
-}
-
-
-
-
-
-			}
-		});
-	} else {
-		// No image to load, add layer immediately
-
-	    // Add tileset source (for both vectors and rasters)
-	  if (tilesource != null && tiletype != null && tileid != null) {  // Only execute code if source, type, and id variables are not blank/null
-		map.addSource(tilesource, {
-		  'type': tiletype,
-		  'url': tileid
-		});
-	  }
+if (iconurl != null && iconurl.trim().toLowerCase().endsWith('.png')) {
 
 	  // In JavaScript, indentation has no effect on code logic. What matters are braces {} and semicolons ;
 	  // Add raster tileset layer
@@ -4157,6 +3130,7 @@ console.log({
 			}
 		}
 	}
+}
 	
 	map.on('click', async function (e) {
 	  popup.remove();
@@ -4330,10 +3304,6 @@ async function loadGeojson() {
     alert('Failed to load data for search.');
   }
 }
-	}
-
-
-
 
 
 async function searchAddress() {
@@ -4533,7 +3503,103 @@ if (styleSelector) {
 }
 
 
+map.on('style.load', () => {
+  for (const layerDef of customLayerDefs) {
+    const layerId = layerDef.id;
 
+    // 1. Add source if not already present
+    if (!map.getSource(layerDef.source.id)) {
+      map.addSource(layerDef.source.id, {
+        type: layerDef.source.type,
+        url: layerDef.source.url
+      });
+    }
+
+    // 2. Load icon image for symbol layers (if applicable)
+    if (layerDef.type === 'symbol') {
+      const iconName = layerDef.layout?.['icon-image'];
+      const iconURL = layerDef.icon?.url;
+
+      if (iconName && iconURL && !map.hasImage(iconName)) {
+        map.loadImage(iconURL, (error, image) => {
+          if (error) {
+            console.error('Icon load error:', error);
+            return;
+          }
+          if (!map.hasImage(iconName)) {
+            map.addImage(iconName, image, { sdf: true });
+          }
+        });
+      }
+    }
+
+    // 3. Determine the correct opacity paint property based on layer type
+    let opacityProperty;
+    switch (layerDef.type) {
+      case 'symbol':
+        opacityProperty = 'icon-opacity';
+        break;
+      case 'fill':
+        opacityProperty = 'fill-opacity';
+        break;
+      case 'circle':
+        opacityProperty = 'circle-opacity';
+        break;
+      case 'raster':
+        opacityProperty = 'raster-opacity';
+        break;
+      case 'line':
+        opacityProperty = 'line-opacity';
+        break;
+      default:
+        opacityProperty = null;
+    }
+
+    // 4. Add layer if it doesn't exist yet
+    if (!map.getLayer(layerId)) {
+      const saved = savedLayerOpacities[layerId];
+      let paintProps = { ...(layerDef.paint || {}) };
+      if (saved && saved.opacityProperty === opacityProperty) {
+        paintProps[opacityProperty] = saved.value;
+      }
+
+      const layoutProps = layerDef.layout ? { ...layerDef.layout } : {};
+      if (layerDef.type === 'symbol') {
+        layoutProps['icon-allow-overlap'] = true;
+      }
+
+	const newLayer = {
+	  id: layerId,
+	  type: layerDef.type,
+	  source: layerDef.source.id,
+	  'source-layer': layerDef['source-layer'],
+	  layout: layoutProps,
+	  paint: paintProps
+	};
+
+	//  Add minzoom/maxzoom if defined
+	if (typeof layerDef.minzoom === 'number') {
+	  newLayer.minzoom = layerDef.minzoom;
+	}
+	if (typeof layerDef.maxzoom === 'number') {
+	  newLayer.maxzoom = layerDef.maxzoom;
+	}
+
+	map.addLayer(newLayer);
+
+    }
+  }
+
+  // Clear saved opacities
+  for (const key in savedLayerOpacities) {
+    delete savedLayerOpacities[key];
+  }
+
+  // Apply zoom-based visibility after all layers are re-added
+  requestAnimationFrame(() => {
+    applyZoomVisibility();
+  });
+});
 
 
 
@@ -4546,6 +3612,54 @@ map.on('error', (e) => {
     console.warn('Mapbox tile load error:', e.error.message);
   }
 });
+
+
+function loadSvgAsImage(iconurl, iconimage, callback) {
+  fetch(iconurl)
+    .then(response => response.text())
+    .then(svgText => {
+      const svgBlob = new Blob([svgText], { type: 'image/svg+xml' });
+      const DOMURL = window.URL || window.webkitURL || window;
+      const url = DOMURL.createObjectURL(svgBlob);
+
+      const img = new Image();
+      img.onload = function () {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+
+        const imageData = ctx.getImageData(0, 0, img.width, img.height);
+
+        map.addImage(iconimage, {
+          width: img.width,
+          height: img.height,
+          data: imageData.data
+        }, { sdf: true });
+
+        if (map.hasImage(iconimage)) {
+          console.log(`Icon '${iconimage}' is present in the map style.`);
+        } else {
+          console.warn(`Icon '${iconimage}' is NOT present in the map style.`);
+        }
+
+        if (callback) callback();
+
+        DOMURL.revokeObjectURL(url);
+      };
+
+      img.onerror = function () {
+        console.error("Failed to load SVG image from", url);
+        DOMURL.revokeObjectURL(url);
+      };
+
+      img.src = url;
+    })
+    .catch(err => console.error("Failed to fetch SVG:", err));
+}
+
+
 
 
 </script>
