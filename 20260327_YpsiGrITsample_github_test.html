@@ -469,7 +469,7 @@ input[type="range"]::-ms-thumb {
     <p>AdaptGeo Consultants</p>
     <div class="spinner" id="spinner"></div>
 
-    <button id="continue-btn" style="display: none;">Continu</button>
+    <button id="continue-btn" style="display: none;">Continue</button>
   </div>
 </div>
 
@@ -2328,16 +2328,25 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
 	  const checkboxid = window["checkbox_id_" + i];
 
 
-	  if (iconurl != null && iconurl.trim().toLowerCase().endsWith('.png')) {
+
+
+
+
+
+
+
+
+
+
+	if (iconurl != null && iconurl.trim().toLowerCase().endsWith('.png')) {
 		map.loadImage(iconurl, function(error, image) {
 			if (error) {
 				console.error(`Failed to load image from ${iconurl}:`, error);
-				return;  // Stop if image fails to load
-			}
-			map.addImage(iconimage, image, { sdf: true });
-			console.log(`Icon '${iconimage}' successfully added to map`);
-		});
-	}
+			} else {
+				map.addImage(iconimage, image, { sdf: true });
+				console.log(`Icon '${iconimage}' successfully added to map`);
+				
+				// ADD YOUR map.addLayer() CALL HERE, inside the callback
 
 	    // Add tileset source (for both vectors and rasters)
 	  if (tilesource != null && tiletype != null && tileid != null) {  // Only execute code if source, type, and id variables are not blank/null
@@ -3323,6 +3332,1004 @@ async function loadGeojson() {
     alert('Failed to load data for search.');
   }
 }
+
+
+
+
+
+			}
+		});
+	} else {
+		// No image to load, add layer immediately
+
+	    // Add tileset source (for both vectors and rasters)
+	  if (tilesource != null && tiletype != null && tileid != null) {  // Only execute code if source, type, and id variables are not blank/null
+		map.addSource(tilesource, {
+		  'type': tiletype,
+		  'url': tileid
+		});
+	  }
+
+	  // In JavaScript, indentation has no effect on code logic. What matters are braces {} and semicolons ;
+	  // Add raster tileset layer
+	  if (tilesource != null && tilename != null && tilelayerid != null && featuretype != null &&
+		  rasteropacity != null && opacityid != null) {
+
+		// Only execute code if source, type, and id variables are not blank/null
+		map.addLayer({
+		  'id': tilelayerid,
+		  'type': featuretype,
+		  'source': tilesource,
+		  'paint': {
+		    'raster-opacity': rasteropacity
+		  }
+		});
+
+
+		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
+		customLayerDefs.push({
+		  id: tilelayerid,
+		  type: featuretype,
+		  source: {
+			id: tilesource,
+			type: tiletype,
+			url: tileid
+		  },
+		  'source-layer': tilename,
+		  paint: {
+			'raster-opacity': rasteropacity
+		  },
+		});
+
+
+		const checkbox = document.getElementById(checkboxid);
+		const slider = document.getElementById(opacityid); // Optional opacity slider
+		const layerId = tilelayerid;
+
+		// Store the last non-zero opacity (default to 1)
+		let lastOpacity = 1;
+
+		if (checkbox) {
+		  checkbox.addEventListener('change', () => {
+			if (!map.getLayer(layerId)) return;
+
+			if (checkbox.checked) {
+			  // Restore last known opacity
+			  map.setPaintProperty(layerId, 'raster-opacity', lastOpacity);
+			} else {
+			  // Store the current opacity before hiding
+			  const currentOpacity = map.getPaintProperty(layerId, 'raster-opacity');
+			  if (currentOpacity > 0) lastOpacity = currentOpacity;
+
+			  // Set layer opacity to 0
+			  map.setPaintProperty(layerId, 'raster-opacity', 0);
+			}
+
+			// Enable or disable the slider, but do NOT change its value
+			if (slider) slider.disabled = !checkbox.checked;
+		  });
+		}
+
+		
+		// Raster layer opacity control
+		var LayerOpacity = document.getElementById(opacityid);
+		if (LayerOpacity) {
+		LayerOpacity.addEventListener('input', function(e) {
+			var opacity = parseFloat(e.target.value, 10) / 100;
+			map.setPaintProperty(tilelayerid, 'raster-opacity', opacity);
+			setLayerVisibility(tilelayerid, opacity);
+		});		  
+		}
+	  }
+
+	  // In JavaScript, indentation has no effect on code logic. What matters are braces {} and semicolons ;	  
+	  // Add vector tileset layer (points, circles)
+	  if (tilesource != null && tilename != null && tilelayerid != null && featuretype != null &&
+		  circleradius != null && circlecolor != null && circleopacity != null && opacityid != null) {
+
+		// Only execute code if source, type, and id variables are not blank/null
+		map.addLayer({
+		  'id': tilelayerid,
+		  'type': featuretype,
+		  'source': tilesource,
+		  'source-layer': tilename,
+		  'paint': {
+			'circle-radius': circleradius,
+			'circle-color': circlecolor,
+			'circle-opacity': circleopacity
+		  }
+		});
+		
+
+		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
+		customLayerDefs.push({
+		  id: tilelayerid,
+		  type: featuretype,
+		  source: {
+			id: tilesource,
+			type: tiletype,
+			url: tileid
+		  },
+		  'source-layer': tilename,
+		  paint: {
+			'circle-radius': circleradius,
+			'circle-color': circlecolor,
+			'circle-opacity': circleopacity
+		  },
+		});
+
+
+		const checkbox = document.getElementById(checkboxid);
+		const slider = document.getElementById(opacityid); // Optional opacity slider
+		const layerId = tilelayerid;
+
+		// Store the last non-zero opacity (default to 1)
+		let lastOpacity = 1;
+
+		if (checkbox) {
+		  checkbox.addEventListener('change', () => {
+			if (!map.getLayer(layerId)) return;
+
+			if (checkbox.checked) {
+			  // Restore last known opacity
+			  map.setPaintProperty(layerId, 'circle-opacity', lastOpacity);
+			} else {
+			  // Store the current opacity before hiding
+			  const currentOpacity = map.getPaintProperty(layerId, 'circle-opacity');
+			  if (currentOpacity > 0) lastOpacity = currentOpacity;
+
+			  // Set layer opacity to 0
+			  map.setPaintProperty(layerId, 'circle-opacity', 0);
+			}
+
+			// Enable or disable the slider, but do NOT change its value
+			if (slider) slider.disabled = !checkbox.checked;
+		  });
+		}
+
+
+		// Vector layer opacity control
+		var LayerOpacity = document.getElementById(opacityid);
+		if (LayerOpacity) {
+		LayerOpacity.addEventListener('input', function(e) {
+			var opacity = parseFloat(e.target.value, 10) / 100;
+			map.setPaintProperty(tilelayerid, 'circle-opacity', opacity);
+			setLayerVisibility(tilelayerid, opacity);
+		});
+		}
+	  }
+
+	  // In JavaScript, indentation has no effect on code logic. What matters are braces {} and semicolons ;
+	  // Add vector tileset layer (points, symbols)
+	  if (tilesource != null && tilename != null && tilelayerid != null && featuretype != null && iconimage != null && iconsize != null 
+		&& iconcolor != null && iconopacity != null && opacityid != null && bearingfield == null) {
+
+		// Only execute code if source, type, and id variables are not blank/null
+		map.addLayer({
+		  'id': tilelayerid,
+		  'type': featuretype,
+		  'source': tilesource,
+		  'source-layer': tilename,
+		  'layout': {
+			'icon-image': iconimage,
+			'icon-size': iconsize
+		  },
+		  'paint': {
+			'icon-color': iconcolor,
+			'icon-opacity': iconopacity
+		  }
+		});
+
+
+		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
+		customLayerDefs.push({
+		  id: tilelayerid,
+		  type: featuretype,
+		  source: {
+			id: tilesource,
+			type: tiletype,
+			url: tileid
+		  },
+		  'source-layer': tilename,
+		  paint: {
+			'icon-color': iconcolor,
+			'icon-opacity': iconopacity
+		  },
+		  icon: {
+			name: iconimage,
+			url: iconurl
+		  },
+		  layout: { 
+			'icon-image': iconimage,
+			'icon-size': iconsize		  
+		  },
+		});
+
+
+		const checkbox = document.getElementById(checkboxid);
+		const slider = document.getElementById(opacityid); // Optional opacity slider
+		const layerId = tilelayerid;
+
+		// Store the last non-zero opacity (default to 1)
+		let lastOpacity = 1;
+
+		if (checkbox) {
+		  checkbox.addEventListener('change', () => {
+			if (!map.getLayer(layerId)) return;
+
+			if (checkbox.checked) {
+			  // Restore last known opacity
+			  map.setPaintProperty(layerId, 'icon-opacity', lastOpacity);
+			} else {
+			  // Store the current opacity before hiding
+			  const currentOpacity = map.getPaintProperty(layerId, 'icon-opacity');
+			  if (currentOpacity > 0) lastOpacity = currentOpacity;
+
+			  // Set layer opacity to 0
+			  map.setPaintProperty(layerId, 'icon-opacity', 0);
+			}
+
+			// Enable or disable the slider, but do NOT change its value
+			if (slider) slider.disabled = !checkbox.checked;
+		  });
+		}
+
+	
+		// Vector layer opacity control
+		var LayerOpacity = document.getElementById(opacityid);
+		if (LayerOpacity) {
+		LayerOpacity.addEventListener('input', function(e) {
+			var opacity = parseFloat(e.target.value, 10) / 100;
+			map.setPaintProperty(tilelayerid, 'icon-opacity', opacity);
+			setLayerVisibility(tilelayerid, opacity);
+		});
+		}
+	  }
+
+console.log({
+  tilesource,
+  tilename,
+  tilelayerid,
+  featuretype,
+  iconimage,
+  iconsize,
+  iconcolor,
+  iconopacity,
+  opacityid,
+  bearingfield,
+  minzoom,
+  maxzoom
+});
+
+
+
+	  // In JavaScript, indentation has no effect on code logic. What matters are braces {} and semicolons ;
+	  // Add vector tileset layer (points, symbols)
+	  if (tilesource != null && tilename != null && tilelayerid != null && featuretype != null && iconimage != null && iconsize != null && iconcolor != null 
+		&& iconopacity != null && opacityid != null && bearingfield != null  && minzoom != null && maxzoom != null) {
+
+		console.log('minzoom:', minzoom);
+		console.log('maxzoom:', maxzoom);
+
+		// Only execute code if source, type, and id variables are not blank/null
+		map.addLayer({
+		  'id': tilelayerid,
+		  'type': featuretype,
+		  'source': tilesource,
+		  'minzoom': minzoom,
+		  'maxzoom': maxzoom,
+		  'source-layer': tilename,
+		  'layout': {
+			'icon-image': iconimage,
+//			'icon-size': iconsize,
+			'icon-size': iconsize, // [
+//			  'interpolate',
+//			  ['linear'], ['zoom'],
+//			  15, 0.5,
+//			  22, 1.5
+//			],
+			'icon-rotate': ['-', ['get', bearingfield], 90],  // No idea why, but must rotate counter-clockwise 90 degrees
+			'icon-rotation-alignment': 'map',     // ensures rotation follows map orientation
+			'icon-allow-overlap': true
+		  },
+		  'paint': {
+			'icon-color': iconcolor,
+			'icon-opacity': iconopacity
+		  }
+		});
+
+
+		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
+		customLayerDefs.push({
+		  id: tilelayerid,
+		  type: featuretype,
+		  source: {
+			id: tilesource,
+			type: tiletype,
+			url: tileid
+		  },
+		  'minzoom': minzoom,
+		  'maxzoom': maxzoom,
+		  'source-layer': tilename,
+		  paint: {
+			'icon-color': iconcolor,
+			'icon-opacity': iconopacity
+		  },
+		  icon: {
+			name: iconimage,
+			url: iconurl
+		  },
+		  layout: { 
+			'icon-image': iconimage,
+			'icon-size': iconsize,	  
+			'icon-rotate': ['-', ['get', bearingfield], 90],  // No idea why, but must rotate counter-clockwise 90 degrees
+			'icon-rotation-alignment': 'map',     // ensures rotation follows map orientation
+			'icon-allow-overlap': true
+		  },
+		});
+
+
+		const checkbox = document.getElementById(checkboxid);
+		const slider = document.getElementById(opacityid); // Optional opacity slider
+		const layerId = tilelayerid;
+
+		// Store the last non-zero opacity (default to 1)
+		let lastOpacity = 1;
+
+		if (checkbox) {
+		  checkbox.addEventListener('change', () => {
+			if (!map.getLayer(layerId)) return;
+
+			if (checkbox.checked) {
+			  // Restore last known opacity
+			  map.setPaintProperty(layerId, 'icon-opacity', lastOpacity);
+			} else {
+			  // Store the current opacity before hiding
+			  const currentOpacity = map.getPaintProperty(layerId, 'icon-opacity');
+			  if (currentOpacity > 0) lastOpacity = currentOpacity;
+
+			  // Set layer opacity to 0
+			  map.setPaintProperty(layerId, 'icon-opacity', 0);
+			}
+
+			// Enable or disable the slider, but do NOT change its value
+			if (slider) slider.disabled = !checkbox.checked;
+		  });
+		}
+
+	
+		// Vector layer opacity control
+		var LayerOpacity = document.getElementById(opacityid);
+		if (LayerOpacity) {
+		LayerOpacity.addEventListener('input', function(e) {
+			var opacity = parseFloat(e.target.value, 10) / 100;
+			map.setPaintProperty(tilelayerid, 'icon-opacity', opacity);
+			setLayerVisibility(tilelayerid, opacity);
+		});
+		}
+	  }
+
+
+
+	  // In JavaScript, indentation has no effect on code logic. What matters are braces {} and semicolons ;
+	  // Add vector tileset layer (lines)
+	  if (tilesource != null && tilename != null && tilelayerid != null && featuretype != null &&
+		  linecolor != null && linewidth != null && lineopacity != null && opacityid != null) {
+
+		// Only execute code if source, type, and id variables are not blank/null
+		map.addLayer({
+		  'id': tilelayerid,
+		  'type': featuretype,
+		  'source': tilesource,
+		  'source-layer': tilename,
+		  'layout': {
+			'line-join': 'round',
+			'line-cap': 'round'
+		  },
+		  'paint': {
+			'line-color': linecolor,
+			'line-width': linewidth,
+			'line-opacity': lineopacity
+		  }
+		});
+
+
+		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
+		customLayerDefs.push({
+		  id: tilelayerid,
+		  type: featuretype,
+		  source: {
+			id: tilesource,
+			type: tiletype,
+			url: tileid
+		  },
+		  'source-layer': tilename,
+		  paint: {
+			'line-color': linecolor,
+			'line-width': linewidth,
+			'line-opacity': lineopacity
+		  },
+		});
+
+
+		const checkbox = document.getElementById(checkboxid);
+		const slider = document.getElementById(opacityid); // Optional opacity slider
+		const layerId = tilelayerid;
+
+		// Store the last non-zero opacity (default to 1)
+		let lastOpacity = 1;
+
+		if (checkbox) {
+		  checkbox.addEventListener('change', () => {
+			if (!map.getLayer(layerId)) return;
+
+			if (checkbox.checked) {
+			  // Restore last known opacity
+			  map.setPaintProperty(layerId, 'line-opacity', lastOpacity);
+			} else {
+			  // Store the current opacity before hiding
+			  const currentOpacity = map.getPaintProperty(layerId, 'line-opacity');
+			  if (currentOpacity > 0) lastOpacity = currentOpacity;
+
+			  // Set layer opacity to 0
+			  map.setPaintProperty(layerId, 'line-opacity', 0);
+			}
+
+			// Enable or disable the slider, but do NOT change its value
+			if (slider) slider.disabled = !checkbox.checked;
+		  });
+		}
+
+		
+		// Vector layer opacity control
+		var LayerOpacity = document.getElementById(opacityid);
+		if (LayerOpacity) {
+		LayerOpacity.addEventListener('input', function(e) {
+			var opacity = parseFloat(e.target.value, 10) / 100;
+			map.setPaintProperty(tilelayerid, 'line-opacity', opacity);
+			setLayerVisibility(tilelayerid, opacity);
+		});	  
+		}
+	  }
+
+	  // In JavaScript, indentation has no effect on code logic. What matters are braces {} and semicolons ;
+	  // Add vector tileset layer (lines, where line width is interpolated (e.g. stream network))
+	  if (tilesource != null && tilename != null && tilelayerid != null && featuretype != null && linecolor != null 
+		  && lineopacity != null && lineinterpolfield != null && lineWidthExpression != null && opacityid != null) {
+
+		// Only execute code if source, type, and id variables are not blank/null
+		map.addLayer({
+		  'id': tilelayerid,
+		  'type': featuretype,
+		  'source': tilesource,
+		  //'minzoom': 19,   This minzoom does not work
+		  //'maxzoom': 22,
+		  'source-layer': tilename,
+		  'paint': {
+			'line-color': linecolor,
+			'line-width': lineWidthExpression,
+			'line-opacity': lineopacity
+		  }
+		});
+
+
+
+	    // Add the manual zoom logic HERE
+	    map.on('zoom', () => {
+		  const zoom = map.getZoom();
+
+		  if (zoom < minzoom || zoom > maxzoom) {
+		    map.setLayoutProperty(tilelayerid, 'visibility', 'none');
+		  } else {
+		    map.setLayoutProperty(tilelayerid, 'visibility', 'visible');
+		  }
+	    });
+
+
+
+		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
+		customLayerDefs.push({
+		  id: tilelayerid,
+		  type: featuretype,
+		  source: {
+			id: tilesource,
+			type: tiletype,
+			url: tileid
+		  },
+		  'source-layer': tilename,
+		  paint: {
+			'line-color': linecolor,
+			'line-width': lineWidthExpression,
+			'line-opacity': lineopacity
+		  },
+		});
+
+
+		const checkbox = document.getElementById(checkboxid);
+		const slider = document.getElementById(opacityid); // Optional opacity slider
+		const layerId = tilelayerid;
+
+		// Store the last non-zero opacity (default to 1)
+		let lastOpacity = 1;
+
+		if (checkbox) {
+		  checkbox.addEventListener('change', () => {
+			if (!map.getLayer(layerId)) return;
+
+			if (checkbox.checked) {
+			  // Restore last known opacity
+			  map.setPaintProperty(layerId, 'line-opacity', lastOpacity);
+			} else {
+			  // Store the current opacity before hiding
+			  const currentOpacity = map.getPaintProperty(layerId, 'line-opacity');
+			  if (currentOpacity > 0) lastOpacity = currentOpacity;
+
+			  // Set layer opacity to 0
+			  map.setPaintProperty(layerId, 'line-opacity', 0);
+			}
+
+			// Enable or disable the slider, but do NOT change its value
+			if (slider) slider.disabled = !checkbox.checked;
+		  });
+		}
+		
+		
+		// Vector layer opacity control
+		var LayerOpacity = document.getElementById(opacityid);
+		if (LayerOpacity) {
+		LayerOpacity.addEventListener('input', function(e) {
+			var opacity = parseFloat(e.target.value, 10) / 100;
+			map.setPaintProperty(tilelayerid, 'line-opacity', opacity);
+			setLayerVisibility(tilelayerid, opacity);
+		});		  
+		}
+	  }
+
+
+	  // In JavaScript, indentation has no effect on code logic. What matters are braces {} and semicolons ;
+	  // Add vector tileset layer (lines, where line width is interpolated (e.g. stream network))
+	  if (tilesource != null && tilename != null && tilelayerid != null && featuretype != null && lineopacity != null 
+		  && linewidth != null && lineinterpolfield != null && lineColorExpression != null && opacityid != null) {
+
+		// Only execute code if source, type, and id variables are not blank/null
+		map.addLayer({
+		  'id': tilelayerid,
+		  'type': featuretype,
+		  'source': tilesource,
+		  'source-layer': tilename,
+		  'paint': {
+			'line-color': lineColorExpression,
+			'line-width': linewidth,
+			'line-opacity': lineopacity
+		  }
+		});
+
+
+
+	    // Add the manual zoom logic HERE
+	    map.on('zoom', () => {
+		  const zoom = map.getZoom();
+
+		  if (zoom < minzoom || zoom > maxzoom) {
+		    map.setLayoutProperty(tilelayerid, 'visibility', 'none');
+		  } else {
+		    map.setLayoutProperty(tilelayerid, 'visibility', 'visible');
+		  }
+	    });
+
+
+
+
+		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
+		customLayerDefs.push({
+		  id: tilelayerid,
+		  type: featuretype,
+		  source: {
+			id: tilesource,
+			type: tiletype,
+			url: tileid
+		  },
+		  'source-layer': tilename,
+		  paint: {
+			'line-color': lineColorExpression,
+			'line-width': linewidth,
+			'line-opacity': lineopacity
+		  },
+		});
+
+
+		const checkbox = document.getElementById(checkboxid);
+		const slider = document.getElementById(opacityid); // Optional opacity slider
+		const layerId = tilelayerid;
+
+		// Store the last non-zero opacity (default to 1)
+		let lastOpacity = 1;
+
+		if (checkbox) {
+		  checkbox.addEventListener('change', () => {
+			if (!map.getLayer(layerId)) return;
+
+			if (checkbox.checked) {
+			  // Restore last known opacity
+			  map.setPaintProperty(layerId, 'line-opacity', lastOpacity);
+			} else {
+			  // Store the current opacity before hiding
+			  const currentOpacity = map.getPaintProperty(layerId, 'line-opacity');
+			  if (currentOpacity > 0) lastOpacity = currentOpacity;
+
+			  // Set layer opacity to 0
+			  map.setPaintProperty(layerId, 'line-opacity', 0);
+			}
+
+			// Enable or disable the slider, but do NOT change its value
+			if (slider) slider.disabled = !checkbox.checked;
+		  });
+		}
+		
+		
+		// Vector layer opacity control
+		var LayerOpacity = document.getElementById(opacityid);
+		if (LayerOpacity) {
+		LayerOpacity.addEventListener('input', function(e) {
+			var opacity = parseFloat(e.target.value, 10) / 100;
+			map.setPaintProperty(tilelayerid, 'line-opacity', opacity);
+			setLayerVisibility(tilelayerid, opacity);
+		});		  
+		}
+	  }
+
+
+//		if (tilelayerid != null && lineopacity != null  && opacityid != null
+//		&& (tilelayerid === 'bbstreams-tileset-layer' || tilelayerid === 'flowdirection-tileset-layer')) {			
+
+			// Vector layer opacity control
+//			var LayerOpacity = document.getElementById(opacityid);
+//			if (LayerOpacity) {
+//			LayerOpacity.addEventListener('input', function(e) {
+//				var opacity = parseFloat(e.target.value, 10) / 100;
+				
+				// Update opacity for the first layer... I have hard-coded the runoff channels layer because I believe the need to control 
+				// multiple layers with a single opacity slider to be uncommon
+//				map.setPaintProperty('bbstreams-tileset-layer', 'line-opacity', opacity);
+//				setLayerVisibility('bbstreams-tileset-layer', opacity);
+
+				// Update opacity for the second layer... I have hard-coded the flow direction layer because I believe the need to control 
+				// multiple layers with a single opacity slider to be uncommon
+//				map.setPaintProperty('flowdirection-tileset-layer', 'icon-opacity', opacity);
+//				setLayerVisibility('flowdirection-tileset-layer', opacity);
+//			});
+//			}
+//		}
+
+
+
+	  // In JavaScript, indentation has no effect on code logic. What matters are braces {} and semicolons ;	  
+	  // Add vector tileset layer (polygons)
+	  if (tilesource != null && tilename != null && tilelayerid != null && featuretype != null &&
+		  fillcolor != null && filloutline != null && fillopacity != null && opacityid != null) {
+
+		// Only execute code if source, type, and id variables are not blank/null
+		// The commented-out 'fill-color' block colorizes parcels based on fields/attributes. I had initially hard-coded values 
+		// to colorize city-owned Boynton Beach parcels, and I've left in the code as an example if we choose to do so in the future.
+		map.addLayer({
+		  'id': tilelayerid,
+		  'type': featuretype,
+		  'source': tilesource,
+		  'source-layer': tilename,
+		  'paint': {
+		    'fill-color': fillcolor,
+//			'fill-color': [
+//				  'match',
+//				  ['get', 'OWNER_NAME'],
+//				  'BOYNTON BEACH CITY OF', '#8B2500',
+//				  /* default, non-city-owned parcels */ fillcolor
+//				],
+			'fill-outline-color': filloutline,
+			'fill-opacity': fillopacity
+		  }
+		});
+
+		customLayerDefs.push({
+		  id: tilelayerid,
+		  type: featuretype,
+		  source: {
+			id: tilesource,
+			type: tiletype,
+			url: tileid
+		  },
+		  'source-layer': tilename,
+		  paint: {
+			'fill-color': fillcolor,
+			'fill-outline-color': filloutline,
+			'fill-opacity': fillopacity
+		  },
+		});
+
+			const checkbox = document.getElementById(checkboxid);
+			const slider = document.getElementById(opacityid); // Optional opacity slider
+			const layerId = tilelayerid;
+
+			// Store the last non-zero opacity (default to 1)
+			let lastOpacity = 1;
+
+			if (checkbox) {
+			  checkbox.addEventListener('change', () => {
+				if (!map.getLayer(layerId)) return;
+
+				if (checkbox.checked) {
+				  // Restore last known opacity
+				  map.setPaintProperty(layerId, 'fill-opacity', lastOpacity);
+				} else {
+				  // Store the current opacity before hiding
+				  const currentOpacity = map.getPaintProperty(layerId, 'fill-opacity');
+				  if (currentOpacity > 0) lastOpacity = currentOpacity;
+
+				  // Set layer opacity to 0
+				  map.setPaintProperty(layerId, 'fill-opacity', 0);
+				}
+
+				// Enable or disable the slider, but do NOT change its value
+				if (slider) slider.disabled = !checkbox.checked;
+			  });
+			}
+	  }
+
+	  	if (tilelayerid != null && fillopacity != null  && opacityid != null && tilelayerid != 'partial-tileset-layer1' 
+		&& tilelayerid != 'partial-tileset-layer2') {  
+		// Only execute code if source, type, and id variables are not blank/null
+			
+			
+			// Vector layer opacity control
+			var LayerOpacity = document.getElementById(opacityid);
+			if (LayerOpacity) {
+			LayerOpacity.addEventListener('input', function(e) {
+				var opacity = parseFloat(e.target.value, 10) / 100;
+				map.setPaintProperty(tilelayerid, 'fill-opacity', opacity);
+				setLayerVisibility(tilelayerid, opacity);
+			});		  
+			}
+		}
+
+		if (tilelayerid != null && fillopacity != null  && opacityid != null
+		&& (tilelayerid === 'partial-tileset-layer1' || tilelayerid === 'partial-tileset-layer2')) {
+		//if (tilelayerid != null && tilelayerid === 'partial-tileset-layer1' || tilelayerid === 'partial-tileset-layer2') {  // || is "or"
+			
+
+			// Vector layer opacity control
+			var LayerOpacity = document.getElementById(opacityid);
+			if (LayerOpacity) {
+			LayerOpacity.addEventListener('input', function(e) {
+				var opacity = parseFloat(e.target.value, 10) / 100;
+				
+				// Update opacity for the first layer... I have hard-coded the trees layers because I believe the need to control 
+				// multiple layers with a single opacity slider to be uncommon
+				map.setPaintProperty('partial-tileset-layer1', 'fill-opacity', opacity);
+				setLayerVisibility('partial-tileset-layer1', opacity);
+
+				// Update opacity for the second layer... I have hard-coded the trees layers because I believe the need to control 
+				// multiple layers with a single opacity slider to be uncommon
+				map.setPaintProperty('partial-tileset-layer2', 'fill-opacity', opacity);
+				setLayerVisibility('partial-tileset-layer2', opacity);
+			});
+			}
+		}
+
+
+	  	if (tilelayerid != null && fillopacity != null  && opacityid != null && tilelayerid != 'partial-tileset-layer3' 
+		&& tilelayerid != 'partial-tileset-layer4') {  
+		// Only execute code if source, type, and id variables are not blank/null
+
+		
+			// Vector layer opacity control
+			var LayerOpacity = document.getElementById(opacityid);
+			if (LayerOpacity) {
+			LayerOpacity.addEventListener('input', function(e) {
+				var opacity = parseFloat(e.target.value, 10) / 100;
+				map.setPaintProperty(tilelayerid, 'fill-opacity', opacity);
+				setLayerVisibility(tilelayerid, opacity);
+			});		  
+			}
+		}
+
+		if (tilelayerid != null && fillopacity != null  && opacityid != null
+		&& (tilelayerid === 'partial-tileset-layer3' || tilelayerid === 'partial-tileset-layer4')) {
+		//if (tilelayerid != null && tilelayerid === 'partial-tileset-layer3' || tilelayerid === 'partial-tileset-layer4') {  // || is "or"
+
+
+			// Vector layer opacity control
+			var LayerOpacity = document.getElementById(opacityid);
+			if (LayerOpacity) {
+			LayerOpacity.addEventListener('input', function(e) {
+				var opacity = parseFloat(e.target.value, 10) / 100;
+				
+				// Update opacity for the first layer
+				map.setPaintProperty('partial-tileset-layer3', 'fill-opacity', opacity);
+				setLayerVisibility('partial-tileset-layer3', opacity);
+
+				// Update opacity for the second layer
+				map.setPaintProperty('partial-tileset-layer4', 'fill-opacity', opacity);
+				setLayerVisibility('partial-tileset-layer4', opacity);
+			});
+			}
+		}
+	}
+	
+	map.on('click', async function (e) {
+	  popup.remove();
+
+	  // Ensure geojsonData is loaded
+	  if (!geojsonData) {
+		try {
+		  await loadGeojson();
+		} catch (err) {
+		  console.error('Error loading GeoJSON for click:', err);
+		  return;
+		}
+	  }
+
+	  if (!geojsonData || !geojsonData.features) {
+		console.warn('GeoJSON data not available for click interaction.');
+		return;
+	  }
+
+	  const clickPoint = turf.point([e.lngLat.lng, e.lngLat.lat]);
+
+	  const matchingFeature = geojsonData.features.find(feature =>
+		turf.booleanPointInPolygon(clickPoint, feature)
+	  );
+
+	  if (matchingFeature) {
+		const props = matchingFeature.properties;
+		const placeName = props[PlaceSearchField];
+		const address = props[AddressSearchField];
+
+		const trimmedPlace = placeName?.trim();
+		const trimmedAddress = address?.trim();
+
+		let popupHTML = '';
+
+		if (trimmedPlace) {
+		  popupHTML += `<strong>Name:</strong> ${trimmedPlace}<br>`;
+		}
+
+		if (trimmedAddress) {
+		  popupHTML += `<strong>Address:</strong> ${trimmedAddress}`;
+		}
+
+		// If neither field is present, show fallback message
+		if (!popupHTML) {
+		  popupHTML = `<em>No address found</em>`;
+		}
+
+		const clickLocation = [e.lngLat.lng, e.lngLat.lat];
+
+		popup
+		  .setLngLat(clickLocation)
+		  .setHTML(popupHTML)
+		  .addTo(map);
+	  }
+	});
+  })
+
+
+function applyZoomVisibility() {
+  const currentZoom = map.getZoom();
+
+  for (const layerDef of customLayerDefs) {
+    const layerId = layerDef.id;
+
+    // Skip layers that don't define minzoom or maxzoom
+    if (typeof layerDef.minzoom !== 'number' && typeof layerDef.maxzoom !== 'number') {
+      continue;
+    }
+
+    const minzoom = layerDef.minzoom ?? -Infinity;
+    const maxzoom = layerDef.maxzoom ?? Infinity;
+
+    if (map.getLayer(layerId)) {
+      const visibility = currentZoom >= minzoom && currentZoom <= maxzoom ? 'visible' : 'none';
+      map.setLayoutProperty(layerId, 'visibility', visibility);
+    }
+  }
+}
+
+map.on('zoom', applyZoomVisibility);
+
+
+let geojsonData = null;  // I don't understand this, but it works
+let fuse = null;  // I don't understand this, but it works
+
+// Normalizes user address input so that it can be somewhat fuzzy (e.g. "first" or "1st")
+function normalizeAddress(str) {
+  if (!str || typeof str !== 'string') return ''; // <== prevents crash
+
+  const ordinals = {
+    first: '1st',
+    second: '2nd',
+    third: '3rd',
+    fourth: '4th',
+    fifth: '5th',
+    sixth: '6th',
+    seventh: '7th',
+    eighth: '8th',
+    ninth: '9th',
+    tenth: '10th'
+  };
+
+  return str.toLowerCase()
+    .replace(/\bnorthwest\b/g, 'nw')
+    .replace(/\bsouthwest\b/g, 'sw')
+    .replace(/\bnortheast\b/g, 'ne')
+    .replace(/\bsoutheast\b/g, 'se')
+    .replace(/\bnorth\b/g, 'n')
+    .replace(/\bsouth\b/g, 's')
+    .replace(/\beast\b/g, 'e')
+    .replace(/\bwest\b/g, 'w')
+    .replace(/\bstreet\b/g, 'st')
+    .replace(/\bavenue\b/g, 'ave')
+    .replace(/\bdrive\b/g, 'dr')
+    .replace(/\bboulevard\b/g, 'blvd')
+    .replace(/\bplace\b/g, 'pl')
+    .replace(/\broad\b/g, 'rd')
+    .replace(/\bcourt\b/g, 'ct')
+    .replace(/\blane\b/g, 'ln')
+    .replace(/\./g, '')
+    .replace(/\b(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\b/g, (match) => ordinals[match])
+    .replace(/\b(\d+)(st|nd|rd|th)\b/g, '$1')
+    .trim();
+}
+
+
+async function loadGeojson() {
+  try {
+    const res = await fetch(githubGeojsonUrl);
+    geojsonData = await res.json();
+
+    // Add normalized address property for Fuse
+    geojsonData.features.forEach(f => {
+      f.normalizedAddress = normalizeAddress(f.properties[AddressSearchField]);
+	  f.normalizedPlaceName = normalizeAddress(f.properties[PlaceSearchField]);
+    });
+
+    // Add source and layer if not already added
+    if (!map.getSource('geojson-source')) {
+      map.addSource('geojson-source', {
+        type: 'geojson',
+        data: geojsonData
+      });
+
+      map.addLayer({
+        id: 'geojson-layer',
+        type: 'fill',  // Since polygon data
+        source: 'geojson-source',
+        paint: {
+          'fill-color': '#FFFFFF',
+          'fill-outline-color': '#FFFFFF',
+          'fill-opacity': 0.01
+        }
+      });
+    }
+
+
+    // Create Fuse on normalizedAddress field.  Not sure if I need Fuse, since threshold is set to 0 and I've defined normalization
+	// rules in the normalizeAddress() function above, but code is currently based on Fuze and works, so I'll keep it in
+    fuse = new Fuse(geojsonData.features, {
+      keys: ['normalizedAddress', 'normalizedPlaceName'],
+      threshold: 0,
+	  includeMatches: true,
+      ignoreLocation: true,
+      minMatchCharLength: 2
+    });
+
+  } catch (err) {
+    console.error('Error loading GeoJSON:', err);
+    alert('Failed to load data for search.');
+  }
+}
+	}
+
+
+
 
 
 async function searchAddress() {
