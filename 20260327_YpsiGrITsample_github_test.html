@@ -476,7 +476,7 @@ input[type="range"]::-ms-thumb {
     <p>AdaptGeo Consultants</p>
     <div class="spinner" id="spinner"></div>
 
-    <button id="continue-btn" style="display: none;">Continue</button>
+    <button id="continue-btn" style="display: none;">Continuu</button>
   </div>
 </div>
 
@@ -972,7 +972,7 @@ var circle_opacity_11 = null;
 	// I believe this is the starting opacity, though 0.75 looks like 1 to me
 var icon_image_11 = 'arrow-icon';  // The Name we give to our image. We use icon parameters only if using an SDF image (e.g. square, star) for
 	// point features
-var icon_url_11 = 'https://raw.githubusercontent.com/TwoPoint34/TwoPoint34.github.io/7e71b1d7356d0804ee9c589c896e55e352606695/flowArrow4.png';  // Raw image url... Must be sdf PNG
+var icon_url_11 = 'https://raw.githubusercontent.com/AGgeoviz/AGgeoviz.github.io/66d5503f57bce5da3bc7c01b871f7b7b054e784f/flowArrow4.png';  // Raw image url... Must be sdf PNG
 	// from github... url for square, star, triangle, and AdaptGeo logo below
 	// square = 'https://raw.githubusercontent.com/AGgeoviz/AGgeoviz.github.io/refs/heads/main/blacksquare1.png'
 	// star = 'https://raw.githubusercontent.com/AGgeoviz/AGgeoviz.github.io/refs/heads/main/blackstar.png'
@@ -2308,10 +2308,70 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
 			console.warn(`Icon '${iconimage}' is NOT present in the map style. Did you call map.addImage()?`);
 		  }
 	  }
+	}
+	  
 
 	  if (iconurl != null && iconurl.trim().toLowerCase().endsWith('.svg')) {
 		loadSvgAsImage(iconurl, iconimage);
 	  }
+
+
+
+	for (let i = 1; i <= tileset_source_list.length; i++) {  // We're simply establishing a counter here, so any list could be used
+
+	  const tilesource = window["tileset_source_" + i];
+	  const tiletype = window["tileset_type_" + i];
+	  const tileid = window["tileset_id_" + i];
+	  const tilename = window["tileset_name_" + i];
+	  const tilelayerid = window["tileset_layerid_" + i];
+	  const minzoom = window["minzoom_" + i];
+	  const maxzoom = window["maxzoom_" + i];
+	  const featuretype = window["feature_type_" + i];
+	  const circleradius = window["circle_radius_" + i];
+	  const circlecolor = window["circle_color_" + i];
+	  const circleopacity = window["circle_opacity_" + i];
+	  const iconimage = window["icon_image_" + i];
+	  const iconurl = window["icon_url_" + i];	  
+	  const iconsize = window["icon_size_" + i];
+	  const iconcolor = window["icon_color_" + i];
+	  const iconopacity = window["icon_opacity_" + i];
+	  const bearingfield = window["BearingField_" + i];
+	  const linecolor = window["line_color_" + i];
+	  const lineopacity = window["line_opacity_" + i];
+	  const linewidth = window["line_width_" + i];
+	  const lineinterpolfield = window["line_intfield_" + i];
+	  const lineWidthExpression = ['interpolate', ['linear'], ['get', lineinterpolfield]];
+	  if (stops != null) {
+	    stops.forEach((stop, index) => {
+		  if (Array.isArray(stop)) {
+		    lineWidthExpression.push(...stop);
+		  } else {
+		    console.warn(`Invalid stop at index ${index}:`, stop);
+		  }
+	    });
+	  }
+	  
+	  // Build the line-color expression using `match`
+	  const lineColorExpression = ['match', ['get', lineinterpolfield]];
+	  if (colorStops != null) {
+	    colorStops.forEach((stop, index) => {
+	      if (Array.isArray(stop) && stop.length === 2) {
+		    lineColorExpression.push(stop[0], stop[1]);
+	      } else {
+		    console.warn(`Invalid color stop at index ${index}:`, stop);
+	      }
+	    });
+	  }
+	  // Add a default color if no match is found
+	  lineColorExpression.push('#000000');  // default color (black)	  
+	  
+	  const fillcolor = window["fill_color_" + i];
+	  const filloutline = window["fill_outline_color_" + i];
+	  const fillopacity = window["fill_opacity_" + i];
+	  const rasteropacity = window["raster_opacity_" + i];
+	  const opacityid = window["opacity_id_" + i];
+	  const checkboxid = window["checkbox_id_" + i];
+
 
 	    // Add tileset source (for both vectors and rasters)
 	  if (tilesource != null && tiletype != null && tileid != null) {  // Only execute code if source, type, and id variables are not blank/null
@@ -2320,12 +2380,6 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
 		  'url': tileid
 		});
 	  }
-
-
-
-
-
-if (iconurl != null && iconurl.trim().toLowerCase().endsWith('.png')) {
 
 	  // In JavaScript, indentation has no effect on code logic. What matters are braces {} and semicolons ;
 	  // Add raster tileset layer
@@ -3130,7 +3184,6 @@ console.log({
 			}
 		}
 	}
-}
 	
 	map.on('click', async function (e) {
 	  popup.remove();
