@@ -469,7 +469,7 @@ input[type="range"]::-ms-thumb {
     <p>AdaptGeo Consultants</p>
     <div class="spinner" id="spinner"></div>
 
-    <button id="continue-btn" style="display: none;">Continu</button>
+    <button id="continue-btn" style="display: none;">Continuu</button>
   </div>
 </div>
 
@@ -3522,103 +3522,7 @@ if (styleSelector) {
 }
 
 
-map.on('style.load', () => {
-  for (const layerDef of customLayerDefs) {
-    const layerId = layerDef.id;
 
-    // 1. Add source if not already present
-    if (!map.getSource(layerDef.source.id)) {
-      map.addSource(layerDef.source.id, {
-        type: layerDef.source.type,
-        url: layerDef.source.url
-      });
-    }
-
-    // 2. Load icon image for symbol layers (if applicable)
-    if (layerDef.type === 'symbol') {
-      const iconName = layerDef.layout?.['icon-image'];
-      const iconURL = layerDef.icon?.url;
-
-      if (iconName && iconURL && !map.hasImage(iconName)) {
-        map.loadImage(iconURL, (error, image) => {
-          if (error) {
-            console.error('Icon load error:', error);
-            return;
-          }
-          if (!map.hasImage(iconName)) {
-            map.addImage(iconName, image, { sdf: true });
-          }
-        });
-      }
-    }
-
-    // 3. Determine the correct opacity paint property based on layer type
-    let opacityProperty;
-    switch (layerDef.type) {
-      case 'symbol':
-        opacityProperty = 'icon-opacity';
-        break;
-      case 'fill':
-        opacityProperty = 'fill-opacity';
-        break;
-      case 'circle':
-        opacityProperty = 'circle-opacity';
-        break;
-      case 'raster':
-        opacityProperty = 'raster-opacity';
-        break;
-      case 'line':
-        opacityProperty = 'line-opacity';
-        break;
-      default:
-        opacityProperty = null;
-    }
-
-    // 4. Add layer if it doesn't exist yet
-    if (!map.getLayer(layerId)) {
-      const saved = savedLayerOpacities[layerId];
-      let paintProps = { ...(layerDef.paint || {}) };
-      if (saved && saved.opacityProperty === opacityProperty) {
-        paintProps[opacityProperty] = saved.value;
-      }
-
-      const layoutProps = layerDef.layout ? { ...layerDef.layout } : {};
-      if (layerDef.type === 'symbol') {
-        layoutProps['icon-allow-overlap'] = true;
-      }
-
-	const newLayer = {
-	  id: layerId,
-	  type: layerDef.type,
-	  source: layerDef.source.id,
-	  'source-layer': layerDef['source-layer'],
-	  layout: layoutProps,
-	  paint: paintProps
-	};
-
-	//  Add minzoom/maxzoom if defined
-	if (typeof layerDef.minzoom === 'number') {
-	  newLayer.minzoom = layerDef.minzoom;
-	}
-	if (typeof layerDef.maxzoom === 'number') {
-	  newLayer.maxzoom = layerDef.maxzoom;
-	}
-
-	map.addLayer(newLayer);
-
-    }
-  }
-
-  // Clear saved opacities
-  for (const key in savedLayerOpacities) {
-    delete savedLayerOpacities[key];
-  }
-
-  // Apply zoom-based visibility after all layers are re-added
-  requestAnimationFrame(() => {
-    applyZoomVisibility();
-  });
-});
 
 
 
