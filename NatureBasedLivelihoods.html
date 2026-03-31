@@ -8,13 +8,14 @@
 	
 <style>
 	.project1-image {
-	  display: flex;
-	  justify-content: center;  /* horizontal centering */
+	  display: flex;                /* enables flex layout */
+	  justify-content: center;      /* horizontal centering */
+	  align-items: center;          /* vertical centering if container taller */
 	}
+	
 	.project1-image img {
-	  height: 300px;
-	  object-fit: cover;
-	  max-width: none;          /* let image keep its natural width */
+	  height: 300px;                /* desired height */
+	  object-fit: cover;            /* crop nicely without stretching */
 	}
 </style>
 
@@ -33,7 +34,7 @@
 
 <header>
 	<title>Nature-based Livelihoods</title>
-  <h1>Nature-bood Livelihoods</h1>
+  <h1>Nature-based Livelihoods</h1>
   <p>Generate skilled, long-term work that cooperates with nature to solve pressing challenges.</p>
 </header>
 
