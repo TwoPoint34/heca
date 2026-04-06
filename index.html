@@ -50,9 +50,29 @@
 			  opacity: 1;
 			}
 			
+			.image.fit-full {
+			  display: block;
+			  width: 100%;
+			  height: auto !important;
+			}
+
 			.image.fit-full img {
+			  width: 100%;
+			  height: auto !important;
 			  object-fit: contain;
 			}
+			
+			@media screen and (max-width: 736px) {
+			  .spotlight.image.fit-full {
+				height: auto !important;
+			  }
+
+			  .spotlight .image.fit-full img {
+				height: auto !important;
+				object-fit: contain;
+			  }
+			}
+			
 			
 			
 		 </style>
@@ -62,7 +82,7 @@
 		<!-- Wrapper -->
 			<div id="wrapper" class="divided">
 
-					<section class="orient-left content-align-left image-position-right fullscreen onload-image-fade-in onload-content-fade-right">
+					<section class="banner style1 orient-left content-align-left image-position-right fullscreen onload-image-fade-in onload-content-fade-right">
 						<div class="content">
 							<h1>Nature-based Home Solutions (NBHS)</h1>
 							<p class="major">In recent years, there has been exciting momentum in ecological landscaping and climate adaptation. NBHS extends 
