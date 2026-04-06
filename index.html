@@ -50,16 +50,20 @@
 			  opacity: 1;
 			}
 			
+			/* Add vertical spacing around your full image */
 			.image.fit-full {
 			  display: block;
 			  width: 100%;
 			  height: auto !important;
+			  padding-top: 3rem;    /* space above image */
+			  padding-bottom: 3rem; /* space below image */
 			}
 
 			.image.fit-full img {
 			  width: 100%;
 			  height: auto !important;
 			  object-fit: contain;
+			  display: block;       /* ensures no extra inline spacing */
 			}
 			
 			
