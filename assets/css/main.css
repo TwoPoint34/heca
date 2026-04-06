@@ -3549,6 +3549,7 @@ input, select, textarea {
 				-ms-flex-direction: column-reverse;
 				flex-direction: column-reverse;
 				text-align: center;
+				background-color: #ffffff;
 			}
 
 				.banner.style1 .content {
