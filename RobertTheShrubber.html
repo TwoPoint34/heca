@@ -8,22 +8,26 @@
 
   <style>
 
+	/* Flex container */
 	.container {
 	  display: flex;
-	  align-items: center; /* vertically aligns text with image */
-	  gap: 10px; /* space between image and text */
+	  align-items: center; /* vertical alignment */
+	  gap: 10px;
+	  flex-wrap: wrap;     /* allows wrapping on small screens */
 	}
 
+	/* Image */
+	.responsive-img {
+	  width: 100%;        /* default: fill available space */
+	  max-width: 50%;     /* mobile max width */
+	  height: auto;       /* maintain aspect ratio */
+	  object-fit: contain; /* ensures image fits without distortion */
+	}
+ 
 	.container img {
       height: 350px;
       width: auto; /* maintains aspect ratio */
 	  margin-right: 10px;
-	}
-
-	  /* Default image styling */
-	.responsive-img {
-	  height: auto;    /* keep aspect ratio */
-	  max-width: 100%; /* don’t overflow container */
 	}
 
 	/* Mobile-specific rules */
