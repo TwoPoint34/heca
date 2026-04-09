@@ -7,16 +7,18 @@
   <link rel="stylesheet" href="assets/css/main.css" />
 
   <style>
-	.project8-image {
-	  display: flex;                /* enables flex layout */
-	  justify-content: center;      /* horizontal centering */
-	  align-items: center;          /* vertical centering if container taller */
+
+	.container {
+	  display: flex;
+	  align-items: center; /* vertically aligns text with image */
 	}
-	
-	.project8-image img {
-	  height: 400px;                /* desired height */
-	  object-fit: cover;            /* crop nicely without stretching */
+
+	.container img {
+      height: 150px;
+      width: auto; /* maintains aspect ratio */
+	  margin-right: 10px;
 	}
+	  
   </style>
 
 </head>
@@ -36,17 +38,14 @@
   <h1>Robert the Shrubber</h1>
 </header>
 
-<div class="image project8-image">
-  <img src="images/RobProfileCropped_scaled1000.jpg" alt="" />
-</div>
-<br>
-
-<p>
--Over 20 years of study and field-based experience in ecological planning and design<br>
+<div class="container">
+  <img src="images/RobProfileCropped_scaled1000.jpg" alt="RobertTheShrubber">
+  <p>-Over 20 years of study and field-based experience in ecological planning and design<br>
 -Maintains over 50 edible perennials (mostly native) on our urban property in Ypsilanti<br>
 -Served over 2 years in the U.S. Peace Corps in Peru<br>
--B.S. Biology/Ecology, M.S. Geographic Information Systems, M.Ag. Agriculture
-</p>
+-B.S. Biology/Ecology, M.S. Geographic Information Systems, M.Ag. Agriculture</p>
+</div>
+<br>
 
 <!-- Back button at bottom -->
 <ul class="actions">
