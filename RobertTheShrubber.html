@@ -11,6 +11,7 @@
 	.container {
 	  display: flex;
 	  align-items: center; /* vertically aligns text with image */
+	  gap: 10px; /* space between image and text */
 	}
 
 	.container img {
@@ -19,6 +20,18 @@
 	  margin-right: 10px;
 	}
 
+	  /* Default image styling */
+	.responsive-img {
+	  height: auto;    /* keep aspect ratio */
+	  max-width: 100%; /* don’t overflow container */
+	}
+
+	/* Mobile-specific rules */
+	@media (max-width: 600px) {
+	  .responsive-img {
+	    max-width: 50%; /* never more than half the screen */
+	  }
+
 	.custom-font {
 	  font-family: "Source Sans Pro", sans-serif;
 	  font-size: 18px;
@@ -26,7 +39,7 @@
 	  line-height: 1.5;
 	  color: #676767;
 	}
-	  
+		
   </style>
 
 </head>
@@ -45,9 +58,9 @@
 <header>
   <h1>Robert the Shrubber</h1>
 </header>
-
+	
 <div class="container">
-  <img src="images/RobProfileCropped_scaled1000.jpg" alt="RobertTheShrubber">
+  <img src="images/RobProfileCropped_scaled1000.jpg" alt="RobertTheShrubber" class="responsive-img">
   <p class="custom-font">-Over 20 years of study and field-based experience in ecological planning and design<br><br>
 -Maintains over 50 edible perennials (mostly native) on our urban property in Ypsilanti<br><br>
 -Served over 2 years in the U.S. Peace Corps in Peru<br><br>
