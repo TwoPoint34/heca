@@ -11,30 +11,34 @@
 	/* Flex container */
 	.container {
 	  display: flex;
-	  align-items: center; /* vertical alignment */
-	  gap: 10px;
-	  flex-wrap: wrap;     /* allows wrapping on small screens */
+	  align-items: center;   /* vertical align */
+	  gap: 10px;             /* space between image and text */
 	}
-
+	
 	/* Image */
 	.responsive-img {
-	  width: 100%;        /* default: fill available space */
-	  max-width: 50%;     /* mobile max width */
-	  height: auto;       /* maintain aspect ratio */
-	  object-fit: contain; /* ensures image fits without distortion */
+	  max-width: 50%;    /* never exceed half the container */
+	  height: auto;      /* maintain aspect ratio */
+	  object-fit: contain;
+	  flex-shrink: 0;    /* prevents image from shrinking below its size */
 	}
- 
-	.container img {
-      height: 350px;
-      width: auto; /* maintains aspect ratio */
-	  margin-right: 10px;
+	
+	/* Text */
+	.container p {
+	  flex: 1;           /* text takes remaining space */
+	  margin: 0;         /* optional, remove extra spacing */
 	}
-
-	/* Mobile-specific rules */
-	@media (max-width: 600px) {
+	
+	/* Optional: small screen tweak */
+	@media (max-width: 480px) {
 	  .responsive-img {
-	    max-width: 50%; /* never more than half the screen */
+	    max-width: 50%;  /* still limited to half width */
 	  }
+	
+	  .container p {
+	    font-size: 16px; /* adjust text size if needed */
+	  }
+	}
 
 	.custom-font {
 	  font-family: "Source Sans Pro", sans-serif;
