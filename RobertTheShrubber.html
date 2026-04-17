@@ -64,11 +64,12 @@
 	  color: #676767;
 	}
 
-	.full-width-img {
-	  width: 100vw;      /* full viewport width */
-	  max-width: 100vw;
-	  display: block;
-	}	  
+	.responsive-img-2 {
+	  max-width: 90%;    /* never exceed half the container */
+	  height: auto;      /* maintain aspect ratio */
+	  object-fit: contain;
+	  flex-shrink: 0;    /* prevents image from shrinking below its size */
+	}
 	  
   </style>
 
@@ -87,7 +88,7 @@
 
 <header>
 <!-- https://commons.wikimedia.org/wiki/File:Codex_Bodmer_127_098r_Detail.jpg -->
-  <p><img src="images/Codex_Bodmer_127_098r_Detail_RobertTheShrubber.jpg" alt="RobertTheShrubber" class="full-width-img"></p>
+  <p><img src="images/Codex_Bodmer_127_098r_Detail_RobertTheShrubber.jpg" alt="RobertTheShrubber" class="responsive-img-2"></p>
 </header>
 	
 <p class="custom-font-5">Shrubberies are my trade... I am a shrubber... My name is Robert the Shrubber<sup>22</sup></p>
