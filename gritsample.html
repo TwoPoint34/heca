@@ -684,11 +684,15 @@ var map = new mapboxgl.Map({
     style: 'mapbox://styles/mapbox/light-v11', // Default style
 });
 
+let tokenAssumedValid = true;
+
 map.on('error', (e) => {
   console.error('Mapbox error:', e);
 
-  if (e && e.error && e.error.status === 401) {
-    console.error('❌ Invalid or unauthorized Mapbox token');
+  // detect likely token issues
+  if (e?.error?.status === 401 || e?.error?.message?.includes('Unauthorized')) {
+    console.error('❌ Mapbox token is invalid or unauthorized');
+    tokenAssumedValid = false;
   }
 });
 
@@ -2139,7 +2143,10 @@ const menuelement = document.getElementById("menu");
 
 map.on('load', function() {  // Once map loads, execute the nested function(s)
 
-
+  if (tokenAssumedValid) {
+    console.log('✔ Map loaded successfully');
+    console.log('✔ Mapbox token appears to be working correctly');
+  }
 
     if (splash) {
 		// Hide spinner
