@@ -673,6 +673,13 @@ island.</p>
 
 <script>
 
+console.log('Creating map at:', new Date().toISOString());
+
+if (window.__mapCreated) {
+  console.warn('⚠️ Map already created once');
+}
+window.__mapCreated = true;
+
 mapboxgl.accessToken = 'pk.eyJ1IjoiYWRhcHRnZW8iLCJhIjoiY2xwdmIwMGlyMDNkZzJrcGsybXh1emFpMSJ9.qeCqoOvHTXJIKF4q80v4CA';
 
 var map = new mapboxgl.Map({
