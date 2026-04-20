@@ -673,28 +673,16 @@ island.</p>
 
 <script>
 
+mapboxgl.accessToken = 'pk.eyJ1IjoiYWRhcHRnZW8iLCJhIjoiY2xwdmIwMGlyMDNkZzJrcGsybXh1emFpMSJ9.qeCqoOvHTXJIKF4q80v4CA';
 
-
-
-document.addEventListener('DOMContentLoaded', () => {
-
-  const mapEl = document.getElementById('map');
-
-  console.log('map width:', mapEl.offsetWidth);
-  console.log('map height:', mapEl.offsetHeight);
-
-  mapboxgl.accessToken = 'pk.eyJ1IjoiYWRhcHRnZW8iLCJhIjoiY2xwdmIwMGlyMDNkZzJrcGsybXh1emFpMSJ9.qeCqoOvHTXJIKF4q80v4CA';
-
-  var map = new mapboxgl.Map({
-    container: 'map',
+var map = new mapboxgl.Map({
+	container: 'map',
 	maxZoom: 20,
 	minZoom: 16,
 	zoom: 16,
 	center: [-83.618813, 42.239132],
-    style: 'mapbox://styles/mapbox/light-v11'
-  });
+    style: 'mapbox://styles/mapbox/light-v11', // Default style
 });
-
 
 let tokenAssumedValid = true;
 
@@ -2159,6 +2147,12 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
     console.log('✔ Map loaded successfully');
     console.log('✔ Mapbox token appears to be working correctly');
   }
+
+  const mapEl = document.getElementById('map');
+
+  console.log('AFTER LOAD width:', mapEl.offsetWidth);
+  console.log('AFTER LOAD height:', mapEl.offsetHeight);
+
 
     if (splash) {
 		// Hide spinner
