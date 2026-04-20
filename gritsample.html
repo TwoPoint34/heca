@@ -675,14 +675,6 @@ island.</p>
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiYWRhcHRnZW8iLCJhIjoiY2xwdmIwMGlyMDNkZzJrcGsybXh1emFpMSJ9.qeCqoOvHTXJIKF4q80v4CA';
 
-map.on('error', (e) => {
-  console.error('Mapbox error:', e);
-
-  if (e && e.error && e.error.status === 401) {
-    console.error('❌ Invalid or unauthorized Mapbox token');
-  }
-});
-
 var map = new mapboxgl.Map({
 	container: 'map',
 	maxZoom: 20,
@@ -692,6 +684,13 @@ var map = new mapboxgl.Map({
     style: 'mapbox://styles/mapbox/light-v11', // Default style
 });
 
+map.on('error', (e) => {
+  console.error('Mapbox error:', e);
+
+  if (e && e.error && e.error.status === 401) {
+    console.error('❌ Invalid or unauthorized Mapbox token');
+  }
+});
 
 // console.log in the block below prints out (using F12 on opened web map/page):
 
