@@ -673,14 +673,6 @@ island.</p>
 
 <script>
 
-const styles = {
-  "Streets": "mapbox://styles/mapbox/streets-v12",
-  "Satellite": "",
-  "Light": "mapbox://styles/mapbox/light-v11",
-  "Dark": "mapbox://styles/mapbox/dark-v11"
-};
-
-
 mapboxgl.accessToken = 'pk.eyJ1IjoiYWRhcHRnZW8iLCJhIjoiY2xwdmIwMGlyMDNkZzJrcGsybXh1emFpMSJ9.qeCqoOvHTXJIKF4q80v4CA';
 var map = new mapboxgl.Map({
 	container: 'map',
@@ -688,7 +680,7 @@ var map = new mapboxgl.Map({
 	minZoom: 16,
 	zoom: 16,
 	center: [-83.618813, 42.239132],
-    style: 'mapbox://styles/mapbox/standard-satellite', // Default style
+    style: 'mapbox://styles/mapbox/light-v11', // Default style
 });
 
 
