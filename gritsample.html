@@ -37,6 +37,59 @@ html, body {
   height: 100%;
 }
 
+#splash-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000; /* above everything */
+  transition: opacity 0.5s ease;
+}
+
+#splash-screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Centered content box */
+.splash-content {
+  background: white;
+  padding: 2rem 3rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  max-width: 90%;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #ccc;
+  border-top: 4px solid #333;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 1rem auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#continue-btn {
+  margin-top: 1rem;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
 #title-bar {
   height: 50px;
   background-color: white;
@@ -119,11 +172,6 @@ html, body {
   overflow: hidden;
 }
 
-#main-content {
-  flex-grow: 1; /* Fills all remaining space */
-  position: absolute; /* So map or overlays can be absolute inside */
-}
-
 .tab.active {
   background-color: #D3D3D3;
 }
@@ -177,11 +225,12 @@ html, body {
 }
 
 #map {
-  position: absolute;
-  top: 94px;
+  top: 94px;   /* Adjust this to match the combined height of title bar and tabs... currently, this parameter is not working */
+  visibility: hidden;  /* hide map initially */
   width: 100%;
-  height: calc(100vh - 94px);
+  height: 100%;  
 }
+
 
 #map.visible {
   visibility: visible; /* show map when ready */
@@ -416,6 +465,16 @@ input[type="range"]::-ms-thumb {
   <img id="modalImage" style="max-width:90%; max-height:90%; margin:auto; display:block; position:absolute; top:0; bottom:0; left:0; right:0;">
 </div>
 
+<div id="splash-screen">
+  <div class="splash-content">
+    <h1>Ypsilanti, MI Green Infrastructure Toolkit (GrIT) Example</h1>
+    <p>AdaptGeo Consultants</p>
+    <div class="spinner" id="spinner"></div>
+
+    <button id="continue-btn" style="display: none;">Continue</button>
+  </div>
+</div>
+
 <!-- Adding an svg as the title bar can mess with the map... best to stick to png -->
 <!--     <div class="tab" data-tab="content2">Content 2</div> -->
 <div id="app">
@@ -425,7 +484,6 @@ input[type="range"]::-ms-thumb {
     <div class="tab active" data-tab="map">Map</div>
     <div class="tab" data-tab="content1">Layer Interpretations</div>
   </div> -->
-
 
 <div id="map" class="tab-content active">
 
@@ -556,7 +614,18 @@ definition within <script> -->
 		</span>
 		<input type="range" id="temp-opacity" min="0.01" max="100" value="50" class="slider">
 	  </div>
-	</div>	
+	</div>
+
+	<div class="menu-item padded-item">
+	  <label for="style-selector" class="slider-label">Base Map:</label>
+	  <select id="style-selector" class="style-select">
+		<option value="Satellite">Satellite</option>
+		<option value="Streets">Streets</option>
+		<option value="Light">Light</option>
+		<option value="Dark">Dark</option>
+	  </select>
+	</div>
+	
 </div>   <!-- This is the closing <div> tab for the "menu" element -->
 </div>
 
@@ -609,35 +678,24 @@ island.</p>
 
 <script>
 
-console.log('Creating map at:', new Date().toISOString());
+const styles = {
+  "Streets": "mapbox://styles/mapbox/streets-v12",
+  "Satellite": "mapbox://styles/mapbox/standard-satellite",
+  "Light": "mapbox://styles/mapbox/light-v11",
+  "Dark": "mapbox://styles/mapbox/dark-v11"
+};
 
-if (window.__mapCreated) {
-  console.warn('⚠️ Map already created once');
-}
-window.__mapCreated = true;
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiYWRhcHRnZW8iLCJhIjoiY2xwdmIwMGlyMDNkZzJrcGsybXh1emFpMSJ9.qeCqoOvHTXJIKF4q80v4CA';
-
 var map = new mapboxgl.Map({
 	container: 'map',
 	maxZoom: 20,
 	minZoom: 16,
 	zoom: 16,
 	center: [-83.618813, 42.239132],
-    style: 'mapbox://styles/mapbox/light-v11', // Default style
+    style: styles["Satellite"], // Default style
 });
 
-let tokenAssumedValid = true;
-
-map.on('error', (e) => {
-  console.error('Mapbox error:', e);
-
-  // detect likely token issues
-  if (e?.error?.status === 401 || e?.error?.message?.includes('Unauthorized')) {
-    console.error('❌ Mapbox token is invalid or unauthorized');
-    tokenAssumedValid = false;
-  }
-});
 
 // console.log in the block below prints out (using F12 on opened web map/page):
 
@@ -646,6 +704,19 @@ map.on('error', (e) => {
 
 	// We use the id: in map.setPaintProperty() below
 
+const element = document.getElementById("aerial-opacity");
+
+if (element && map.getLayer('satellitestreets')) {
+  // The element exists — run your code here
+  console.log("Element found!");
+  // Example:
+  map.on('style.load', () => {  
+    document.getElementById('aerial-opacity').addEventListener('input', (e) => {
+    const opacity = parseFloat(e.target.value);
+    map.setPaintProperty('satellitestreets', 'raster-opacity', opacity);
+    });
+  });
+}
 
 // Create empty list for all to-be-defined variables such that the lists can later be looped through and the variables processed
 let tileset_source_list = [];  // Create empty list for tileset_source_##
@@ -2079,30 +2150,43 @@ var popup = new mapboxgl.Popup({
 	closeButton: false
 });
 
+
+const customLayerDefs = []; // Stores all custom layer definitions. Everytime a user selects a mapbox style (basemap), the map 
+// layers must be reloaded. We create the customLayerDefs list so that reloading the layers will not require executing the 
+// entire code loop below
+const splash = document.getElementById("splash-screen");
 const titlebar = null;
 const menuelement = document.getElementById("menu");
 
 
 map.on('load', function() {  // Once map loads, execute the nested function(s)
 
-  if (tokenAssumedValid) {
-    console.log('✔ Map loaded successfully');
-    console.log('✔ Mapbox token appears to be working correctly');
-  }
-
-  const mapEl = document.getElementById('map');
-
-  console.log('AFTER LOAD width:', mapEl.offsetWidth);
-  console.log('AFTER LOAD height:', mapEl.offsetHeight);
 
 
+    if (splash) {
+		// Hide spinner
+		document.getElementById('spinner').style.display = 'none';
 
-	document.getElementById('map').classList.add('visible');
-	if (titlebar) {
-	  document.getElementById('title-bar').style.display = 'block'; }
-	if (menuelement) {
-	  document.getElementById('menu').style.display = 'block'; }
+		// Show continue button
+		const continueBtn = document.getElementById('continue-btn');
+		continueBtn.style.display = 'inline-block';
 
+		// When button is clicked
+		continueBtn.addEventListener('click', () => {
+		  document.getElementById('splash-screen').remove();
+		  document.getElementById('map').classList.add('visible');
+		  if (titlebar) {
+			document.getElementById('title-bar').style.display = 'block'; }
+		  if (menuelement) {
+			document.getElementById('menu').style.display = 'block'; }
+		});
+	} else {
+			document.getElementById('map').classList.add('visible');
+			if (titlebar) {
+			  document.getElementById('title-bar').style.display = 'block'; }
+			if (menuelement) {
+			  document.getElementById('menu').style.display = 'block'; }
+		}
 
 	map.resize()
 
@@ -2219,6 +2303,9 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
 		  }
 	  }
 
+	  if (iconurl != null && iconurl.trim().toLowerCase().endsWith('.svg')) {
+		loadSvgAsImage(iconurl, iconimage);
+	  }
 
 	    // Add tileset source (for both vectors and rasters)
 	  if (tilesource != null && tiletype != null && tileid != null) {  // Only execute code if source, type, and id variables are not blank/null
@@ -2241,6 +2328,22 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
 		  'paint': {
 		    'raster-opacity': rasteropacity
 		  }
+		});
+
+
+		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
+		customLayerDefs.push({
+		  id: tilelayerid,
+		  type: featuretype,
+		  source: {
+			id: tilesource,
+			type: tiletype,
+			url: tileid
+		  },
+		  'source-layer': tilename,
+		  paint: {
+			'raster-opacity': rasteropacity
+		  },
 		});
 
 
@@ -2300,6 +2403,24 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
 			'circle-color': circlecolor,
 			'circle-opacity': circleopacity
 		  }
+		});
+		
+
+		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
+		customLayerDefs.push({
+		  id: tilelayerid,
+		  type: featuretype,
+		  source: {
+			id: tilesource,
+			type: tiletype,
+			url: tileid
+		  },
+		  'source-layer': tilename,
+		  paint: {
+			'circle-radius': circleradius,
+			'circle-color': circlecolor,
+			'circle-opacity': circleopacity
+		  },
 		});
 
 
@@ -2362,6 +2483,31 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
 			'icon-color': iconcolor,
 			'icon-opacity': iconopacity
 		  }
+		});
+
+
+		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
+		customLayerDefs.push({
+		  id: tilelayerid,
+		  type: featuretype,
+		  source: {
+			id: tilesource,
+			type: tiletype,
+			url: tileid
+		  },
+		  'source-layer': tilename,
+		  paint: {
+			'icon-color': iconcolor,
+			'icon-opacity': iconopacity
+		  },
+		  icon: {
+			name: iconimage,
+			url: iconurl
+		  },
+		  layout: { 
+			'icon-image': iconimage,
+			'icon-size': iconsize		  
+		  },
 		});
 
 
@@ -2458,6 +2604,36 @@ console.log({
 		});
 
 
+		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
+		customLayerDefs.push({
+		  id: tilelayerid,
+		  type: featuretype,
+		  source: {
+			id: tilesource,
+			type: tiletype,
+			url: tileid
+		  },
+		  'minzoom': minzoom,
+		  'maxzoom': maxzoom,
+		  'source-layer': tilename,
+		  paint: {
+			'icon-color': iconcolor,
+			'icon-opacity': iconopacity
+		  },
+		  icon: {
+			name: iconimage,
+			url: iconurl
+		  },
+		  layout: { 
+			'icon-image': iconimage,
+			'icon-size': iconsize,	  
+			'icon-rotate': ['-', ['get', bearingfield], 90],  // No idea why, but must rotate counter-clockwise 90 degrees
+			'icon-rotation-alignment': 'map',     // ensures rotation follows map orientation
+			'icon-allow-overlap': true
+		  },
+		});
+
+
 		const checkbox = document.getElementById(checkboxid);
 		const slider = document.getElementById(opacityid); // Optional opacity slider
 		const layerId = tilelayerid;
@@ -2520,6 +2696,24 @@ console.log({
 			'line-width': linewidth,
 			'line-opacity': lineopacity
 		  }
+		});
+
+
+		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
+		customLayerDefs.push({
+		  id: tilelayerid,
+		  type: featuretype,
+		  source: {
+			id: tilesource,
+			type: tiletype,
+			url: tileid
+		  },
+		  'source-layer': tilename,
+		  paint: {
+			'line-color': linecolor,
+			'line-width': linewidth,
+			'line-opacity': lineopacity
+		  },
 		});
 
 
@@ -2597,6 +2791,25 @@ console.log({
 	    });
 
 
+
+		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
+		customLayerDefs.push({
+		  id: tilelayerid,
+		  type: featuretype,
+		  source: {
+			id: tilesource,
+			type: tiletype,
+			url: tileid
+		  },
+		  'source-layer': tilename,
+		  paint: {
+			'line-color': linecolor,
+			'line-width': lineWidthExpression,
+			'line-opacity': lineopacity
+		  },
+		});
+
+
 		const checkbox = document.getElementById(checkboxid);
 		const slider = document.getElementById(opacityid); // Optional opacity slider
 		const layerId = tilelayerid;
@@ -2668,6 +2881,26 @@ console.log({
 		    map.setLayoutProperty(tilelayerid, 'visibility', 'visible');
 		  }
 	    });
+
+
+
+
+		// Add to customLayerDefs list so that layers can be re-added after removed by setStyle
+		customLayerDefs.push({
+		  id: tilelayerid,
+		  type: featuretype,
+		  source: {
+			id: tilesource,
+			type: tiletype,
+			url: tileid
+		  },
+		  'source-layer': tilename,
+		  paint: {
+			'line-color': lineColorExpression,
+			'line-width': linewidth,
+			'line-opacity': lineopacity
+		  },
+		});
 
 
 		const checkbox = document.getElementById(checkboxid);
@@ -2761,6 +2994,21 @@ console.log({
 		  }
 		});
 
+		customLayerDefs.push({
+		  id: tilelayerid,
+		  type: featuretype,
+		  source: {
+			id: tilesource,
+			type: tiletype,
+			url: tileid
+		  },
+		  'source-layer': tilename,
+		  paint: {
+			'fill-color': fillcolor,
+			'fill-outline-color': filloutline,
+			'fill-opacity': fillopacity
+		  },
+		});
 
 			const checkbox = document.getElementById(checkboxid);
 			const slider = document.getElementById(opacityid); // Optional opacity slider
@@ -2927,6 +3175,30 @@ console.log({
 	  }
 	});
   })
+
+
+function applyZoomVisibility() {
+  const currentZoom = map.getZoom();
+
+  for (const layerDef of customLayerDefs) {
+    const layerId = layerDef.id;
+
+    // Skip layers that don't define minzoom or maxzoom
+    if (typeof layerDef.minzoom !== 'number' && typeof layerDef.maxzoom !== 'number') {
+      continue;
+    }
+
+    const minzoom = layerDef.minzoom ?? -Infinity;
+    const maxzoom = layerDef.maxzoom ?? Infinity;
+
+    if (map.getLayer(layerId)) {
+      const visibility = currentZoom >= minzoom && currentZoom <= maxzoom ? 'visible' : 'none';
+      map.setLayoutProperty(layerId, 'visibility', visibility);
+    }
+  }
+}
+
+map.on('zoom', applyZoomVisibility);
 
 
 let geojsonData = null;  // I don't understand this, but it works
@@ -3164,8 +3436,161 @@ const nav = new mapboxgl.NavigationControl({
 map.addControl(nav, 'bottom-right'); // or 'top-left', 'bottom-right', 'bottom-left'
 
 
+console.log('customLayerDefs contents:', customLayerDefs);
+console.log('customLayerDefs length:', customLayerDefs.length);
+
 // Store previous opacities of custom layers (symbol, fill, etc.)
 const savedLayerOpacities = {};
+
+const styleSelector = document.getElementById('style-selector');
+if (styleSelector) {
+  styleSelector.addEventListener('change', function (e) {
+    const selectedStyle = e.target.value;
+
+    for (const layerDef of customLayerDefs) {
+      const layerId = layerDef.id;
+      if (map.getLayer(layerId)) {
+        // Determine the opacity property to check based on layer type
+        let opacityProperty;
+
+        switch (layerDef.type) {
+          case 'raster':
+            opacityProperty = 'raster-opacity';
+            break;
+          case 'symbol':
+            opacityProperty = 'icon-opacity';
+            break;
+          case 'fill':
+            opacityProperty = 'fill-opacity';
+            break;
+          case 'line':
+            opacityProperty = 'line-opacity';
+            break;
+          case 'circle':
+            opacityProperty = 'circle-opacity';
+            break;
+          default:
+            opacityProperty = null; // or skip if you don't want to track
+        }
+
+        if (opacityProperty) {
+          const currentOpacity = map.getPaintProperty(layerId, opacityProperty);
+          savedLayerOpacities[layerId] = {
+            type: layerDef.type,
+            opacityProperty,
+            value: currentOpacity
+          };
+        }
+      }
+    }
+
+    // Apply the new style
+    map.setStyle(styles[selectedStyle]);
+  });
+}
+
+
+map.on('style.load', () => {
+  for (const layerDef of customLayerDefs) {
+    const layerId = layerDef.id;
+
+    // 1. Add source if not already present
+    if (!map.getSource(layerDef.source.id)) {
+      map.addSource(layerDef.source.id, {
+        type: layerDef.source.type,
+        url: layerDef.source.url
+      });
+    }
+
+    // 2. Load icon image for symbol layers (if applicable)
+    if (layerDef.type === 'symbol') {
+      const iconName = layerDef.layout?.['icon-image'];
+      const iconURL = layerDef.icon?.url;
+
+      if (iconName && iconURL && !map.hasImage(iconName)) {
+        map.loadImage(iconURL, (error, image) => {
+          if (error) {
+            console.error('Icon load error:', error);
+            return;
+          }
+          if (!map.hasImage(iconName)) {
+            map.addImage(iconName, image, { sdf: true });
+          }
+        });
+      }
+    }
+
+    // 3. Determine the correct opacity paint property based on layer type
+    let opacityProperty;
+    switch (layerDef.type) {
+      case 'symbol':
+        opacityProperty = 'icon-opacity';
+        break;
+      case 'fill':
+        opacityProperty = 'fill-opacity';
+        break;
+      case 'circle':
+        opacityProperty = 'circle-opacity';
+        break;
+      case 'raster':
+        opacityProperty = 'raster-opacity';
+        break;
+      case 'line':
+        opacityProperty = 'line-opacity';
+        break;
+      default:
+        opacityProperty = null;
+    }
+
+    // 4. Add layer if it doesn't exist yet
+    if (!map.getLayer(layerId)) {
+      const saved = savedLayerOpacities[layerId];
+      let paintProps = { ...(layerDef.paint || {}) };
+      if (saved && saved.opacityProperty === opacityProperty) {
+        paintProps[opacityProperty] = saved.value;
+      }
+
+      const layoutProps = layerDef.layout ? { ...layerDef.layout } : {};
+      if (layerDef.type === 'symbol') {
+        layoutProps['icon-allow-overlap'] = true;
+      }
+
+	const newLayer = {
+	  id: layerId,
+	  type: layerDef.type,
+	  source: layerDef.source.id,
+	  'source-layer': layerDef['source-layer'],
+	  layout: layoutProps,
+	  paint: paintProps
+	};
+
+	//  Add minzoom/maxzoom if defined
+	if (typeof layerDef.minzoom === 'number') {
+	  newLayer.minzoom = layerDef.minzoom;
+	}
+	if (typeof layerDef.maxzoom === 'number') {
+	  newLayer.maxzoom = layerDef.maxzoom;
+	}
+
+	map.addLayer(newLayer);
+
+    }
+  }
+
+  // Clear saved opacities
+  for (const key in savedLayerOpacities) {
+    delete savedLayerOpacities[key];
+  }
+
+  // Apply zoom-based visibility after all layers are re-added
+  requestAnimationFrame(() => {
+    applyZoomVisibility();
+  });
+});
+
+
+
+
 
 
 
@@ -3174,6 +3599,54 @@ map.on('error', (e) => {
     console.warn('Mapbox tile load error:', e.error.message);
   }
 });
+
+
+function loadSvgAsImage(iconurl, iconimage, callback) {
+  fetch(iconurl)
+    .then(response => response.text())
+    .then(svgText => {
+      const svgBlob = new Blob([svgText], { type: 'image/svg+xml' });
+      const DOMURL = window.URL || window.webkitURL || window;
+      const url = DOMURL.createObjectURL(svgBlob);
+
+      const img = new Image();
+      img.onload = function () {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+
+        const imageData = ctx.getImageData(0, 0, img.width, img.height);
+
+        map.addImage(iconimage, {
+          width: img.width,
+          height: img.height,
+          data: imageData.data
+        }, { sdf: true });
+
+        if (map.hasImage(iconimage)) {
+          console.log(`Icon '${iconimage}' is present in the map style.`);
+        } else {
+          console.warn(`Icon '${iconimage}' is NOT present in the map style.`);
+        }
+
+        if (callback) callback();
+
+        DOMURL.revokeObjectURL(url);
+      };
+
+      img.onerror = function () {
+        console.error("Failed to load SVG image from", url);
+        DOMURL.revokeObjectURL(url);
+      };
+
+      img.src = url;
+    })
+    .catch(err => console.error("Failed to fetch SVG:", err));
+}
+
+
 
 
 </script>
