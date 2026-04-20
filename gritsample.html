@@ -693,15 +693,18 @@ const styles = {
 
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiYWRhcHRnZW8iLCJhIjoiY2xwdmIwMGlyMDNkZzJrcGsybXh1emFpMSJ9.qeCqoOvHTXJIKF4q80v4CA';
-var map = new mapboxgl.Map({
-	container: 'map',
-	maxZoom: 20,
-	minZoom: 16,
-	zoom: 12,
-	center: [-83.618813, 42.239132],
-    style: styles["streets-v12"], // Default style
-	pixelRatio: 1
-});
+
+
+if (!window.mapInstance) {
+  window.mapInstance = new mapboxgl.Map({
+    container: "map",
+    style: "mapbox://styles/mapbox/streets-v12",
+    center: [-83.618813, 42.239132],
+    zoom: 9
+  });
+}
+
+
 
 
 // console.log in the block below prints out (using F12 on opened web map/page):
