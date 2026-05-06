@@ -211,6 +211,34 @@ html, body {
   cursor: pointer;
 }
 
+#controls {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+  background: white;
+  padding: 10px;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  font-family: sans-serif;
+  font-size: 14px;
+}
+
+.control-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+
+.control-item input {
+  margin-right: 10px;
+}
+
+.control-item:last-child {
+  margin-bottom: 0;
+}
+
 .mapboxgl-ctrl-bottom-right {
   position: absolute !important;  /* needed for z-index to apply */
   z-index: 99999 !important;       /* very high to beat other UI */
@@ -479,6 +507,19 @@ input[type="range"]::-ms-thumb {
 
 <div id="map" class="tab-content active">
 
+<div id="controls">
+  <label class="control-item">
+    <input type="checkbox" id="measureToggle">
+    <span>Measure Distance</span>
+  </label>
+
+  <label class="control-item">
+    <input type="checkbox" id="addressToggle" checked>
+    <span>Display Address</span>
+  </label>
+</div>
+
+
 <!-- It is not possible to nest html comments inside other comments.  Therefore, in order to be able to comment out the block 
 starting with <div id="menu">, I am writing all relevant comments before (rather than within) that block.
 
@@ -692,7 +733,50 @@ let points = [];
 
 let measurepopup = null;
 
-function updateMap() {
+let activeAddressPopup = null;
+
+let measuringEnabled = false;
+
+let addressEnabled = true;
+
+const measureCheckbox = document.getElementById('measureToggle');
+
+measureCheckbox.addEventListener('change', () => {
+  measuringEnabled = measureCheckbox.checked;
+
+  if (!measuringEnabled) {
+    points = [];
+
+    if (measurepopup) {
+      measurepopup.remove();
+      measurepopup = null;
+    }
+
+    updateMeasurement();
+  }
+});
+
+const addressCheckbox = document.getElementById('addressToggle');
+
+addressCheckbox.addEventListener('change', () => {
+  addressEnabled = addressCheckbox.checked;
+
+	if (!addressEnabled) {
+	  if (activeAddressPopup) {
+		activeAddressPopup.remove();
+		activeAddressPopup = null;
+	  }
+	}
+});
+
+function clearAllPopups() {
+  if (measurepopup) {
+    measurepopup.remove();
+    measurepopup = null;
+  }
+}
+
+function updateMeasurement() {
   const geojson = {
     type: 'FeatureCollection',
     features: []
@@ -2198,12 +2282,6 @@ checkbox_id_list.push(checkbox_id_20);
 // IMPORTANT: Mapbox GL JS only supports GeoJSON in EPSG:4326 !!!  THAT SAID, THE BEST COURSE OF ACTION MAY BE TO REMOVE THE CRS FROM THE GEOJSON FILE ENTIRELY
 
 
-// Add a popup to the map
-var popup = new mapboxgl.Popup({
-	closeButton: false
-});
-
-
 const customLayerDefs = []; // Stores all custom layer definitions. Everytime a user selects a mapbox style (basemap), the map 
 // layers must be reloaded. We create the customLayerDefs list so that reloading the layers will not require executing the 
 // entire code loop below
@@ -2213,8 +2291,6 @@ const menuelement = document.getElementById("menu");
 
 
 map.on('load', function() {  // Once map loads, execute the nested function(s)
-
-
 
     if (splash) {
 		// Hide spinner
@@ -2244,7 +2320,8 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
 	map.resize()
 
 	map.on('click', (e) => {
-	  console.log(points);
+	  
+	  if (!measuringEnabled) return; // disables tool
 
 	  const coords = [e.lngLat.lng, e.lngLat.lat];
 	  points.push(coords);
@@ -2290,7 +2367,7 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
 	  }
 
 	  // Update map drawing
-	  updateMap();
+	  updateMeasurement();
 	});
 
 
@@ -2328,8 +2405,7 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
 	function setLayerVisibility(layerId, opacity) {
 		if (opacity === 0) {
 			map.setLayoutProperty(layerId, 'visibility', 'none');
-			// Remove pop-up if opacity is 0
-			popup.remove();
+			// Remove pop-up if opacity is 0		
 		} else {
 			map.setLayoutProperty(layerId, 'visibility', 'visible');
 		}
@@ -3223,8 +3299,9 @@ console.log({
 	}
 	
 	map.on('click', async function (e) {
-	  popup.remove();
-
+	  
+	  if (!addressEnabled) return; // disables tool
+	  
 	  // Ensure geojsonData is loaded
 	  if (!geojsonData) {
 		try {
@@ -3269,9 +3346,16 @@ console.log({
 		  popupHTML = `<em>No address found</em>`;
 		}
 
+
+
 		const clickLocation = [e.lngLat.lng, e.lngLat.lat];
 
-		popup
+		if (activeAddressPopup) {
+		  activeAddressPopup.remove();
+		  activeAddressPopup = null;
+		}
+
+		activeAddressPopup = new mapboxgl.Popup({ closeButton: true })
 		  .setLngLat(clickLocation)
 		  .setHTML(popupHTML)
 		  .addTo(map);
@@ -3400,6 +3484,9 @@ async function searchAddress() {
   const addressInput = document.getElementById('address');
   const rawSearchTerm = addressInput.value.trim();
 
+  addressEnabled = true;
+  document.getElementById('addressToggle').checked = true;
+
   if (!rawSearchTerm) {
     alert('Please enter an address to search.');
     return;
@@ -3413,22 +3500,42 @@ async function searchAddress() {
 
   const results = fuse.search(searchTerm);
 
+  // -----------------------------
+  // NO RESULTS
+  // -----------------------------
   if (results.length === 0) {
     const center = map.getCenter();
-    popup
-      .setLngLat(center)
-      .setHTML('<strong>No match found</strong><br>Please try a different search.')
-      .addTo(map);
+
+    // remove previous popup
+    if (activeAddressPopup) {
+      activeAddressPopup.remove();
+      activeAddressPopup = null;
+    }
+
+    // create new popup
+	if (activeAddressPopup) {
+	  activeAddressPopup.remove();
+	  activeAddressPopup = null;
+	}
+
+	activeAddressPopup = new mapboxgl.Popup({ closeButton: true })
+	  .setLngLat(center)
+	  .setHTML('<strong>No match found</strong><br>Please try a different search.')
+	  .addTo(map);
+
     return;
   }
 
+  // -----------------------------
+  // PROCESS MATCH
+  // -----------------------------
   const match = results[0].item;
   const matches = results[0].matches || [];
 
   const addressValue = match.properties[AddressSearchField];
   const placeNameValue = match.properties[PlaceSearchField];
 
-  // Determine which field matched (using Fuse's match metadata)
+  // Determine which field matched
   let matchedField = 'Match';
   for (const m of matches) {
     if (m.key === 'normalizedAddress') {
@@ -3449,31 +3556,35 @@ async function searchAddress() {
     return;
   }
 
-  const displayValue = matchedField === 'Address'
-    ? addressValue
-    : matchedField === 'Name'
-    ? placeNameValue
-    : 'No value available';
-
   map.flyTo({
     center,
     zoom: 17,
     speed: 1.5
   });
 
-let popupHTML = '';
+  // -----------------------------
+  // BUILD POPUP CONTENT
+  // -----------------------------
+  let popupHTML = '';
 
-if (placeNameValue && placeNameValue.trim() !== '') {
-  popupHTML += `<strong>Name:</strong> ${placeNameValue}<br>`;
-}
+  if (placeNameValue && placeNameValue.trim() !== '') {
+    popupHTML += `<strong>Name:</strong> ${placeNameValue}<br>`;
+  }
 
-popupHTML += `<strong>Address:</strong> ${addressValue}`;
+  popupHTML += `<strong>Address:</strong> ${addressValue}`;
 
-popup
-  .setLngLat(center)
-  .setHTML(popupHTML)
-  .addTo(map);
+  // -----------------------------
+  // SHOW POPUP (CONTROLLED)
+  // -----------------------------
+  if (activeAddressPopup) {
+    activeAddressPopup.remove();
+    activeAddressPopup = null;
+  }
 
+  activeAddressPopup = new mapboxgl.Popup({ closeButton: true })
+    .setLngLat(center)
+    .setHTML(popupHTML)
+    .addTo(map);
 }
 
 
@@ -3492,13 +3603,19 @@ function closeModal() {
 
 if (githubGeojsonUrl != null) {  
 	document.addEventListener('DOMContentLoaded', function () {
-	  // document.getElementById() input parameter below should match "id" in html menu (e.g. id="address")
+	  // document.getElementById() input parameter below should match "id" in html menu (e.g. id="address")	  
 	  document.getElementById('address').addEventListener('keydown', function (e) {
-		if (e.key === 'Enter') {
-		  console.log("Enter key pressed, triggering search...");
-		  searchAddress('geojson-layer');
-		}
-	  });
+		  if (e.key === 'Enter') {
+			e.preventDefault(); // 👈 THIS is likely missing
+			console.log("Enter key pressed, triggering search...");
+			searchAddress();
+		  }
+		});
+	  
+	  
+	  
+	  
+	  
 	  
 	  // Search button click triggers the same function
 	  // document.getElementById() input parameter below should match "id" in html menu (e.g. id="searchBtn")
