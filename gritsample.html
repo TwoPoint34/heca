@@ -688,6 +688,67 @@ var map = new mapboxgl.Map({
     style: styles["Satellite"], // Default style
 });
 
+let points = [];
+
+let measurepopup = null;
+
+function updateMap() {
+  const geojson = {
+    type: 'FeatureCollection',
+    features: []
+  };
+
+  points.forEach((p) => {
+    geojson.features.push({
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: p
+      }
+    });
+  });
+
+  if (points.length === 2) {
+    geojson.features.push({
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+        coordinates: points
+      }
+    });
+  }
+
+  if (map.getSource('measure')) {
+    map.getSource('measure').setData(geojson);
+  } else {
+    map.addSource('measure', {
+      type: 'geojson',
+      data: geojson
+    });
+
+    map.addLayer({
+      id: 'measure-points',
+      type: 'circle',
+      source: 'measure',
+      paint: {
+        'circle-radius': 6,
+        'circle-color': '#000'
+      },
+      filter: ['==', '$type', 'Point']
+    });
+
+    map.addLayer({
+      id: 'measure-line',
+      type: 'line',
+      source: 'measure',
+      paint: {
+        'line-color': '#ff0000',
+        'line-width': 2
+      },
+      filter: ['==', '$type', 'LineString']
+    });
+  }
+}
 
 // console.log in the block below prints out (using F12 on opened web map/page):
 
@@ -2181,6 +2242,56 @@ map.on('load', function() {  // Once map loads, execute the nested function(s)
 		}
 
 	map.resize()
+
+	map.on('click', (e) => {
+	  console.log(points);
+
+	  const coords = [e.lngLat.lng, e.lngLat.lat];
+	  points.push(coords);
+
+	  // If exactly 2 points → measure + show popup
+	if (points.length === 2) {
+	  const distance = turf.distance(points[0], points[1], { units: 'feet' });
+
+	  const midpoint = turf.midpoint(
+		turf.point(points[0]),
+		turf.point(points[1])
+	  );
+
+	  const midpointCoords = midpoint.geometry.coordinates;
+
+	  // remove old popup safely
+	  if (measurepopup) {
+		measurepopup.remove();
+		measurepopup = null;
+	  }
+
+	  // create popup FIRST
+	  const newPopup = new mapboxgl.Popup({ closeOnClick: false });
+
+	  // assign immediately so state is valid
+	  measurepopup = newPopup;
+
+	  // now safe to use
+	  measurepopup
+		.setLngLat(midpointCoords)
+		.setHTML(`<strong>${distance.toFixed(2)} ft</strong>`)
+		.addTo(map);
+	}
+
+	  // If more than 2 points → reset
+	  if (points.length > 2) {
+		points = [coords];
+
+		if (measurepopup) {
+		  measurepopup.remove();
+		  measurepopup = null;
+		}
+	  }
+
+	  // Update map drawing
+	  updateMap();
+	});
 
 
 	// Add scale bar in the bottom-left corner
