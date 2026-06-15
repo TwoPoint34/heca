@@ -90,6 +90,13 @@
 			  opacity: 1;
 			}
 			
+			.responsive-img-2 {
+			  max-width: 90%;    /* never exceed half the container */
+			  height: auto;      /* maintain aspect ratio */
+			  object-fit: contain;
+			  flex-shrink: 0;    /* prevents image from shrinking below its size */
+			}
+			
 		 </style>
 	</head>
 	<body class="is-preload">
@@ -408,18 +415,17 @@
 
 
 </p>
+					<p>
+					<h2>About Me<br>
+					Shrubberies are my trade... I am a shrubber... My name is Robert the Shrubber</h2>
+					<header>
+					<!-- https://commons.wikimedia.org/wiki/File:Codex_Bodmer_127_098r_Detail.jpg -->
+					  <p><img src="images/Codex_Bodmer_127_098r_Detail_RobertTheShrubber.jpg" alt="RobertTheShrubber" class="responsive-img-2"></p>
+					</header>
+					</p>
+					
 					<section id="RtS" class="spotlight style1 orient-left content-align-left image-position-center">
 						<div class="content">
-							
-							<h2 id="RtS">About Me<br><br>
-							Shrubberies are my trade... I am a shrubber... My name is Robert the Shrubber
-							</h2>
-
-							<header>
-							<!-- https://commons.wikimedia.org/wiki/File:Codex_Bodmer_127_098r_Detail.jpg -->
-							  <p><img src="images/Codex_Bodmer_127_098r_Detail_RobertTheShrubber.jpg" alt="RobertTheShrubber" class="responsive-img-2"></p>
-							</header>
-							
 							<p>
 							• Over 20 years of study and field-based experience in ecological planning and design<br><br>
 							• Maintains over 50 edible perennials (mostly native) on our urban property in Ypsilanti<br><br>
@@ -438,7 +444,6 @@
 
 
 </p>
-					
 					<section id="center-text-box">
 					  <div class="inner">
 						<h2>Contact Us</h2>						
