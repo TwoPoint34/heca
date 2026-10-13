@@ -1,0 +1,99 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Save Clients Money and Improve Quality of Life</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="assets/css/main.css" />
+
+  <style>
+	.project3-image {
+	  display: flex;                /* enables flex layout */
+	  justify-content: center;      /* horizontal centering */
+	  align-items: center;          /* vertical centering if container taller */
+	}
+	
+	.project3-image img {
+	  height: 275px;                /* desired height */
+	  object-fit: cover;            /* crop nicely without stretching */
+	}
+
+	.custom-font-3 {
+	  font-family: "Source Sans Pro", sans-serif;
+	  font-size: 10px;
+	  font-style: normal;
+	  line-height: 1.2;
+	  color: #676767;
+	}
+
+	.custom-font {
+	  font-family: "Source Sans Pro", Helvetica, sans-serif;
+	  font-size: 24px;
+	  font-style: normal;
+	  line-height: 1.2;
+	  color: #676767;
+	}
+
+	.custom-font-7 {
+	  font-family: "Source Sans Pro", Helvetica, sans-serif;
+	  font-size: 9px;
+	  font-style: normal;
+	  line-height: 1.2;
+	  color: #676767;
+	}
+  </style>
+
+</head>
+<body class="is-preload">
+
+<div id="wrapper" class="divided">
+
+<section class="wrapper style1 align-left">
+<div class="inner">
+
+<ul class="actions">
+  <li><a href="index.html#MEH" class="button small icon solid fa-arrow-left">Back</a></li>
+  <li><a href="index.html#SNB" class="button small icon solid">Next Benefit</a></li>
+</ul>
+
+<header>
+  <h1>How NBHS Saves Clients Money and Improves their Quality of Life</h1>
+</header>
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Reduce or eliminate costly basement flooding and foundation damage<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Offer health benefits, including: clean air and water, stress reduction, tick and mosquito control<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Establish trees and shrubs that produce food year after year<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Reduce area of lawn that requires mowing<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Save on municipal stormwater infrastructure and treatment costs, which are passed on to residents through 
+	reduced tax burden and/or stormwater credits<sup class="custom-font-7">2</sup><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Save on utility bills through: shading from trees, water conserving landscapes, rooftop solar power, and/or 
+	geothermal heating/cooling<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Reduce icing of driveways and sidewalks<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Provide due diligence for clients looking to buy a house or land so that hidden pitfalls can be identified before
+	the buyer “bets the farm”</p>
+	
+<div style="height:30px;"></div>
+	
+<p class="custom-font-3"><sup class="custom-font-3">2</sup>City of Ann Arbor, “Stormwater Credits,” accessed April 17, 2026, 
+	https://www.a2gov.org/systems-planning/water-resources/stormwater/stormwater-credits/.</p>	
+
+<div class="image project3-image">
+  <img src="images/pexels-rachel-claire-4577574_cropped1_scaled2.jpg" alt="" />
+</div>
+<br>
+
+<ul class="actions">
+  <li><a href="index.html#MEH" class="button small icon solid fa-arrow-left">Back</a></li>
+</ul>
+
+</div>
+</section>
+
+</div>
+
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/main.js"></script>
+
+</body>
+</html>
